@@ -1,0 +1,93 @@
+/**
+ * ArrivalRow Component
+ *
+ * Displays a single arrival entry in the board
+ *
+ * TODO: Style to match MTR station screen design
+ * TODO: Add animation for arriving trains
+ * TODO: Add crowding indicator visuals
+ */
+
+import type { Arrival } from "../../models";
+import { formatETA } from "../../lib/api";
+
+export interface ArrivalRowProps {
+  arrival: Arrival;
+  showPlatform?: boolean;
+  showCrowding?: boolean;
+  showTrainLength?: boolean;
+}
+
+export function ArrivalRow({
+  arrival,
+  showPlatform = false,
+  showCrowding = false,
+  showTrainLength = false,
+}: ArrivalRowProps) {
+  // TODO: Add proper styling with Tailwind
+  // TODO: Add color coding based on crowding level
+  // TODO: Add platform highlight
+
+  return (
+    <div className="flex items-center justify-between border-b border-gray-200 py-3">
+      {/* Platform */}
+      {showPlatform && arrival.platform && (
+        <div className="w-16 text-center">
+          <span className="text-2xl font-bold">{arrival.platform}</span>
+        </div>
+      )}
+
+      {/* Destination */}
+      <div className="flex-1">
+        <div className="text-lg font-semibold">
+          {arrival.destinationZh || arrival.destination}
+        </div>
+        {arrival.status && (
+          <div className="text-sm text-gray-500">{arrival.status}</div>
+        )}
+      </div>
+
+      {/* Train Length */}
+      {showTrainLength && arrival.trainLength && (
+        <div className="mx-4 text-sm text-gray-400">
+          {arrival.trainLength} 卡
+        </div>
+      )}
+
+      {/* Crowding */}
+      {showCrowding && arrival.crowding && (
+        <div className="mx-4">
+          <CrowdingIndicator level={arrival.crowding} />
+        </div>
+      )}
+
+      {/* ETA */}
+      <div className="w-24 text-right text-2xl font-bold">
+        {formatETA(arrival.eta)}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Crowding Indicator Component
+ *
+ * TODO: Add proper visual design
+ */
+function CrowdingIndicator({ level }: { level: string }) {
+  // TODO: Use colors matching MTR style
+  const colors = {
+    low: "bg-green-500",
+    medium: "bg-yellow-500",
+    high: "bg-red-500",
+  };
+
+  return (
+    <div
+      className={`h-4 w-4 rounded-full ${colors[level as keyof typeof colors] || "bg-gray-300"}`}
+      title={`Crowding: ${level}`}
+    />
+  );
+}
+
+export default ArrivalRow;

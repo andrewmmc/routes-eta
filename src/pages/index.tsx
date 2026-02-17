@@ -1,78 +1,66 @@
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
+/**
+ * Home Page
+ *
+ * Landing page with links to sample boards
+ *
+ * TODO: Add search functionality
+ * TODO: Add favorites/recent boards
+ * TODO: Add operator selection
+ */
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+import Link from "next/link";
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+export default function HomePage() {
+  // TODO: Load from config or API
+  const sampleBoards = [
+    {
+      id: "mtr-tsuen-wan-central",
+      name: "MTR Tsuen Wan Line - Central",
+      nameZh: "港鐵荃灣綫 - 中環",
+      href: "/board/mtr/TWL/CEN/down",
+    },
+    {
+      id: "mtr-island-chaiwan",
+      name: "MTR Island Line - Chai Wan",
+      nameZh: "港鐵港島綫 - 柴灣",
+      href: "/board/mtr/ISL/CHW/up",
+    },
+  ];
 
-export default function Home() {
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black`}
-    >
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the index.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="min-h-screen bg-gray-100 p-4">
+      <div className="mx-auto max-w-2xl">
+        <h1 className="mb-8 text-center text-3xl font-bold">Routes ETA</h1>
+        <p className="mb-8 text-center text-gray-600">
+          Hong Kong Transport Arrival Board Display
+        </p>
+
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Sample Boards</h2>
+
+          {sampleBoards.map((board) => (
+            <Link
+              key={board.id}
+              href={board.href}
+              className="block rounded-lg bg-white p-4 shadow transition hover:shadow-md"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+              <div className="font-semibold">{board.name}</div>
+              <div className="text-gray-500">{board.nameZh}</div>
+            </Link>
+          ))}
+        </div>
+
+        {/* TODO: Add custom board URL builder */}
+        <div className="mt-8 rounded-lg bg-white p-4 shadow">
+          <h2 className="mb-4 text-xl font-semibold">Custom Board</h2>
+          <p className="text-gray-500">
+            Use the URL pattern:{" "}
+            <code className="rounded bg-gray-100 px-2 py-1">
+              /board/[operator]/[service]/[station]
+            </code>
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs/pages/getting-started?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </div>
     </div>
   );
 }
