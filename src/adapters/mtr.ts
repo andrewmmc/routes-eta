@@ -66,7 +66,31 @@ export const mtrAdapter: TransportAdapter = {
     // TODO: Parse and validate raw data with Zod
     // const validated = MtrApiResponseSchema.parse(raw);
 
-    // Return dummy BoardState for now
+    // Return dummy BoardState for testing MTR UI
+    // Get line color based on service ID
+    const lineColors: Record<string, string> = {
+      TWL: "#E2231A", // Tsuen Wan Line - red
+      ISL: "#0075C2", // Island Line - blue
+      KTL: "#00A040", // Kwun Tong Line - green
+      TKL: "#7D499D", // Tseung Kwan O Line - purple
+      EAL: "#5EB6E4", // East Rail Line - light blue
+      TML: "#9A3B26", // Tuen Ma Line - brown
+      SIL: "#B5BD00", // South Island Line - lime
+      TCL: "#F7943E", // Tung Chung Line - orange
+    };
+
+    // Get destination based on direction
+    const destinations: Record<string, { en: string; zh: string }> = {
+      TWL: { en: "Central", zh: "中環" },
+      ISL: { en: "Chai Wan", zh: "柴灣" },
+      KTL: { en: "Whampoa", zh: "黃埔" },
+      TKL: { en: "Po Lam", zh: "寶琳" },
+      EAL: { en: "Lo Wu", zh: "羅湖" },
+      TML: { en: "Tuen Mun", zh: "屯門" },
+    };
+
+    const dest = destinations[params.serviceId] || { en: "Central", zh: "中環" };
+
     return {
       operator: {
         id: "mtr",
@@ -75,31 +99,52 @@ export const mtrAdapter: TransportAdapter = {
       },
       station: {
         id: params.stopId,
-        name: params.stopId,
-        nameZh: params.stopId,
+        name: "Admiralty",
+        nameZh: "金鐘",
       },
       service: {
         id: params.serviceId,
-        name: params.serviceId,
-        nameZh: params.serviceId,
+        name: "Tsuen Wan Line",
+        nameZh: "荃灣綫",
+        direction: params.directionId as "up" | "down",
+        color: lineColors[params.serviceId] || "#E2231A",
       },
+      direction: params.directionId as "up" | "down",
       arrivals: [
         {
-          eta: new Date(Date.now() + 2 * 60 * 1000), // 2 mins
+          eta: new Date(Date.now() + 30 * 1000), // Arriving soon (< 1 min)
           status: "Arriving",
           platform: "1",
-          destination: "Central",
-          destinationZh: "中環",
+          destination: dest.en,
+          destinationZh: dest.zh,
           crowding: "low",
           trainLength: 8,
         },
         {
-          eta: new Date(Date.now() + 6 * 60 * 1000), // 6 mins
+          eta: new Date(Date.now() + 4 * 60 * 1000), // 4 mins
           status: "Scheduled",
           platform: "1",
-          destination: "Central",
-          destinationZh: "中環",
+          destination: dest.en,
+          destinationZh: dest.zh,
           crowding: "medium",
+          trainLength: 8,
+        },
+        {
+          eta: new Date(Date.now() + 8 * 60 * 1000), // 8 mins
+          status: "Scheduled",
+          platform: "1",
+          destination: dest.en,
+          destinationZh: dest.zh,
+          crowding: "high",
+          trainLength: 8,
+        },
+        {
+          eta: new Date(Date.now() + 12 * 60 * 1000), // 12 mins
+          status: "Scheduled",
+          platform: "1",
+          destination: dest.en,
+          destinationZh: dest.zh,
+          crowding: "low",
           trainLength: 8,
         },
       ],

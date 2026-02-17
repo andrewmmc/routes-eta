@@ -15,7 +15,8 @@
  */
 
 import { useRouter } from "next/router";
-import { BoardScreen } from "../../components/board";
+import Head from "next/head";
+import { BoardScreen, MTRBoard } from "../../components/board";
 import { useBoardData } from "../../hooks";
 import { LoadingBoard } from "../../components/ui/LoadingSpinner";
 import { ErrorDisplay } from "../../components/ui/ErrorDisplay";
@@ -77,11 +78,39 @@ export default function BoardPage() {
     return <ErrorDisplay message="No data available" onRetry={refresh} />;
   }
 
-  // Render board
+  // Render board - use MTR skin for MTR operator
+  const isMTR = operatorId === "mtr";
+
+  // Format last updated for page title
+  const lastUpdatedStr = data.lastUpdated.toLocaleTimeString("zh-HK", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+
+  const pageTitle = `${data.station.nameZh || data.station.name} | ${data.service.nameZh || data.service.name} | 更新: ${lastUpdatedStr}`;
+
+  if (isMTR) {
+    return (
+      <>
+        <Head>
+          <title>{pageTitle}</title>
+        </Head>
+        <MTRBoard boardState={data} layout={config.layout} />
+      </>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <BoardScreen boardState={data} layout={config.layout} />
-    </div>
+    <>
+      <Head>
+        <title>{pageTitle}</title>
+      </Head>
+      <div className="min-h-screen bg-gray-100 p-4">
+        <BoardScreen boardState={data} layout={config.layout} />
+      </div>
+    </>
   );
 }
 
