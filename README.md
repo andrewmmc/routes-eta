@@ -53,6 +53,30 @@ npm run build         # Production build
 npm run lint          # Run ESLint
 npm run format        # Format with Prettier
 npm run format:check  # Check formatting
+npm run test          # Run tests
+npm run generate:mtr  # Regenerate MTR data from CSV
+```
+
+## MTR Data Generation
+
+MTR line and station data is generated from `src/data/mtr_lines_and_stations.csv` using the `scripts/generate-mtr-data.ts` script.
+
+### Branch Line Handling
+
+The script handles MTR lines with branches by merging branch directions into their parent line:
+
+- **East Rail Line (EAL)**: Lok Ma Chau branch (LMC-DT/LMC-UT) is merged into main EAL directions. Lo Wu and Lok Ma Chau are displayed as alternative termini (e.g., "Admiralty → Lok Ma Chau/Lo Wu").
+
+- **Tseung Kwan O Line (TKL)**: LOHAS Park branch (TKS-DT/TKS-UT) is merged into main TKL directions. Po Lam and LOHAS Park are displayed as alternative termini (e.g., "North Point → LOHAS Park/Po Lam").
+
+Direction labels show all alternative termini with "/" separator when a line has multiple branches.
+
+### Regenerating Data
+
+If you modify the CSV or the generation script:
+
+```bash
+npm run generate:mtr
 ```
 
 ## Status
