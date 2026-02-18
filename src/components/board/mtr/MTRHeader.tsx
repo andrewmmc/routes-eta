@@ -3,9 +3,11 @@
  *
  * Top header bar with weather (placeholder) and current time
  * Dark navy blue background with white text
+ * Clickable to navigate back to home page
  */
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 export function MTRHeader() {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -25,7 +27,10 @@ export function MTRHeader() {
   });
 
   return (
-    <div className="flex flex-[0.75] items-center justify-between bg-[#1a3a5f] px-16 text-white">
+    <Link
+      href="/"
+      className="flex flex-[0.75] cursor-pointer items-center justify-between bg-[#1a3a5f] px-16 text-white"
+    >
       {/* Left: Weather placeholder */}
       <div className="flex items-center gap-6">
         {/* Weather icon placeholder */}
@@ -38,7 +43,7 @@ export function MTRHeader() {
 
       {/* Right: Current time */}
       <div className="text-7xl font-bold tracking-wider">{formattedTime}</div>
-    </div>
+    </Link>
   );
 }
 
