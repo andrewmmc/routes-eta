@@ -15,8 +15,8 @@ export function LoadingSpinner() {
 export function LoadingBoard() {
   return (
     <div className="flex h-screen flex-col bg-white">
-      {/* Empty Header Bar */}
-      <div className="flex h-16 items-center justify-between bg-[#003768] px-16" />
+      {/* Empty Header Bar - matches MTRHeader flex-[0.75] and color */}
+      <div className="flex flex-[0.75] items-center justify-between bg-[#1a3a5f] px-16" />
 
       {/* Empty Rows */}
       {[0, 1, 2, 3].map((index) => (
