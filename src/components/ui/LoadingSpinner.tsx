@@ -2,8 +2,6 @@
  * Loading Component
  *
  * Displays a loading state for the board
- *
- * TODO: Add skeleton loading animation matching MTR style
  */
 
 export function LoadingSpinner() {
@@ -16,24 +14,28 @@ export function LoadingSpinner() {
 
 export function LoadingBoard() {
   return (
-    <div className="mx-auto max-w-2xl rounded-lg bg-white p-6 shadow-lg">
-      <div className="animate-pulse">
-        {/* Header skeleton */}
-        <div className="mb-4">
-          <div className="mb-2 h-4 w-20 rounded bg-gray-200" />
-          <div className="mb-2 h-8 w-48 rounded bg-gray-200" />
-          <div className="h-6 w-32 rounded bg-gray-200" />
-        </div>
-
-        {/* Rows skeleton */}
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="flex items-center py-3">
-            <div className="h-6 w-16 rounded bg-gray-200" />
-            <div className="ml-4 h-6 flex-1 rounded bg-gray-200" />
-            <div className="ml-4 h-6 w-20 rounded bg-gray-200" />
-          </div>
-        ))}
+    <div className="flex h-screen flex-col bg-white">
+      {/* Empty Header Bar */}
+      <div className="flex h-16 items-center justify-between bg-[#003768] px-16">
+        <div className="h-6 w-32 animate-pulse rounded bg-white/20" />
+        <div className="h-6 w-24 animate-pulse rounded bg-white/20" />
       </div>
+
+      {/* Loading Rows */}
+      {[0, 1, 2, 3].map((index) => (
+        <div
+          key={index}
+          className={`flex flex-1 items-center justify-between px-16 ${
+            index % 2 === 0 ? "bg-white" : "bg-[#d6eaf8]"
+          }`}
+        >
+          <div className="h-12 w-48 animate-pulse rounded bg-gray-200" />
+          <div className="flex items-center gap-4">
+            <div className="h-16 w-16 animate-pulse rounded-full bg-gray-200" />
+            <div className="h-10 w-40 animate-pulse rounded bg-gray-200" />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
