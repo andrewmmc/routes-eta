@@ -22,8 +22,6 @@ export interface MTRBoardProps {
 
 export function MTRBoard({ boardState, layout = {} }: MTRBoardProps) {
   const [language, setLanguage] = useState<Language>("zh");
-  // Lazy init - runs once on mount, acceptable since data refreshes every 60s
-  const [now] = useState(() => Date.now());
 
   // Toggle language every 10 seconds
   useEffect(() => {
@@ -42,15 +40,7 @@ export function MTRBoard({ boardState, layout = {} }: MTRBoardProps) {
     showTrainLength: layout.showTrainLength ?? true,
   };
 
-  // Filter out arrivals more than 60 minutes away
-  const visibleArrivals = boardState.arrivals.filter((arrival) => {
-    if (!arrival.eta) return true;
-    const diffMs = arrival.eta.getTime() - now;
-    const diffMins = diffMs / 60000;
-    return diffMins <= 60;
-  });
-
-  const displayedArrivals = visibleArrivals.slice(0, config.rows);
+  const displayedArrivals = boardState.arrivals.slice(0, config.rows);
   const emptyRowsCount = config.rows - displayedArrivals.length;
   const hasNoData = displayedArrivals.length === 0;
 

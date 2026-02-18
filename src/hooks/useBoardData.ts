@@ -5,9 +5,18 @@
  */
 
 import useSWR from "swr";
-import type { BoardState } from "../models";
+import type { BoardState, Arrival } from "../models";
 import { getAdapter } from "../adapters";
 import type { FetchParams } from "../adapters/base";
+
+const MAX_ETA_MS = 60 * 60000; // 60 minutes
+
+function filterByMaxEta(arrivals: Arrival[]): Arrival[] {
+  const now = Date.now();
+  return arrivals.filter(
+    (arrival) => !arrival.eta || arrival.eta.getTime() - now <= MAX_ETA_MS,
+  );
+}
 
 export interface UseBoardDataOptions {
   operatorId: string;
@@ -56,7 +65,11 @@ export function useBoardData({
     const raw = await adapter.fetchRaw(params);
 
     // Transform to BoardState
-    return adapter.mapToBoardState(raw, params);
+    const boardState = await adapter.mapToBoardState(raw, params);
+    return {
+      ...boardState,
+      arrivals: filterByMaxEta(boardState.arrivals),
+    };
   };
 
   const { data, isLoading, error, mutate } = useSWR(cacheKey, fetcher, {
