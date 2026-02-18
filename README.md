@@ -23,8 +23,11 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 
 ### Sample Boards
 
-- `/board/mtr/TWL/CEN/down` - MTR Tsuen Wan Line to Central
-- `/board/mtr/ISL/CHW/up` - MTR Island Line to Chai Wan
+- `/board/mtr/TWL/CEN/down` - MTR Tsuen Wan Line at Central (toward Central)
+- `/board/mtr/TWL/TSW/down` - MTR Tsuen Wan Line at Tsuen Wan (toward Central)
+- `/board/mtr/ISL/CHW/up` - MTR Island Line at Chai Wan (toward Chai Wan)
+- `/board/mtr/EAL/LOW/up` - MTR East Rail Line at Lo Wu (branch line)
+- `/board/mtr/TKL/POA/down` - MTR Tseung Kwan O Line at Po Lam (branch line)
 
 ### URL Pattern
 
@@ -39,11 +42,23 @@ External API → Adapter → BoardState (unified model) → UI Components
 ```
 
 The UI does not directly consume external API data. Each transport operator has an adapter that:
-1. Fetches raw data from the API
-2. Transforms it to the unified `BoardState` model
+
+1. Fetches raw data from the operator's API
+2. Validates and transforms it to the unified `BoardState` model
 3. Declares supported capabilities (platform, crowding, etc.)
 
 This allows adding new operators without modifying UI components.
+
+### Adapter Capabilities
+
+Each adapter declares what features it supports:
+
+| Capability | Description |
+|------------|-------------|
+| `hasPlatform` | Show platform number (MTR: yes) |
+| `hasCrowding` | Show crowding level (planned) |
+| `hasNextStation` | Show next station info (planned) |
+| `hasTrainLength` | Show train car count (planned) |
 
 ## Scripts
 
@@ -54,6 +69,7 @@ npm run lint          # Run ESLint
 npm run format        # Format with Prettier
 npm run format:check  # Check formatting
 npm run test          # Run tests
+npm run test:watch    # Run tests in watch mode
 npm run generate:mtr  # Regenerate MTR data from CSV
 ```
 
@@ -79,10 +95,21 @@ If you modify the CSV or the generation script:
 npm run generate:mtr
 ```
 
+## Features
+
+- Real-time MTR arrival data from DATA.GOV.HK API
+- MTR station screen style UI with line colors
+- Platform information display
+- Support for branch lines (East Rail Line to Lok Ma Chau/Lo Wu, Tseung Kwan O Line to LOHAS Park/Po Lam)
+- Racecourse route indication for East Rail Line
+- Arrival/Departing status indicators
+- Train delay status display
+- ETAs greater than 60 minutes are hidden for cleaner display
+
 ## Status
 
-- MTR adapter: dummy implementation (needs real API integration)
-- KMB, Citybus, Ferry: to be added later
+- **MTR**: Fully functional with real-time DATA.GOV.HK API integration
+- **KMB, Citybus, Ferry**: Planned for future release
 
 ## License
 
