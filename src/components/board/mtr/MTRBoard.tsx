@@ -22,12 +22,22 @@ export interface MTRBoardProps {
 
 export function MTRBoard({ boardState, layout = {} }: MTRBoardProps) {
   const [language, setLanguage] = useState<Language>("zh");
+  const [now, setNow] = useState(Date.now);
 
   // Toggle language every 10 seconds
   useEffect(() => {
     const timer = setInterval(() => {
       setLanguage((prev) => (prev === "zh" ? "en" : "zh"));
     }, 10000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Update current time every minute for filtering
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(Date.now());
+    }, 60000);
 
     return () => clearInterval(timer);
   }, []);
@@ -40,7 +50,15 @@ export function MTRBoard({ boardState, layout = {} }: MTRBoardProps) {
     showTrainLength: layout.showTrainLength ?? true,
   };
 
-  const displayedArrivals = boardState.arrivals.slice(0, config.rows);
+  // Filter out arrivals more than 60 minutes away
+  const visibleArrivals = boardState.arrivals.filter((arrival) => {
+    if (!arrival.eta) return true;
+    const diffMs = arrival.eta.getTime() - now;
+    const diffMins = diffMs / 60000;
+    return diffMins <= 60;
+  });
+
+  const displayedArrivals = visibleArrivals.slice(0, config.rows);
   const emptyRowsCount = config.rows - displayedArrivals.length;
   const hasNoData = displayedArrivals.length === 0;
 
