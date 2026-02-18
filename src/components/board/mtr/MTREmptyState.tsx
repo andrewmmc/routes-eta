@@ -2,24 +2,30 @@
  * MTREmptyState Component
  *
  * Placeholder rows displayed when no arrival data is available
- * Renders 4 rows with zebra stripe pattern
+ * Renders rows with zebra stripe pattern
  */
 
 export interface MTREmptyStateProps {
-  rows?: number;
+  rows: number;
+  startIndex?: number;
+  showMessage?: boolean;
 }
 
-export function MTREmptyState({ rows = 4 }: MTREmptyStateProps) {
+export function MTREmptyState({
+  rows,
+  startIndex = 0,
+  showMessage = true,
+}: MTREmptyStateProps) {
   return (
     <>
       {Array.from({ length: rows }).map((_, index) => (
         <div
           key={index}
           className={`flex flex-1 items-center justify-center ${
-            index % 2 === 0 ? "bg-white" : "bg-[#d6eaf8]"
+            (startIndex + index) % 2 === 0 ? "bg-white" : "bg-[#d6eaf8]"
           }`}
         >
-          {index === 0 && (
+          {showMessage && index === 0 && (
             <span className="text-4xl text-gray-400">暫無班次資料</span>
           )}
         </div>

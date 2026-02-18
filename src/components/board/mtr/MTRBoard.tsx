@@ -27,6 +27,8 @@ export function MTRBoard({ boardState, layout = {} }: MTRBoardProps) {
   };
 
   const displayedArrivals = boardState.arrivals.slice(0, config.rows);
+  const emptyRowsCount = config.rows - displayedArrivals.length;
+  const hasNoData = displayedArrivals.length === 0;
 
   return (
     <div className="flex h-screen flex-col bg-white">
@@ -43,8 +45,14 @@ export function MTRBoard({ boardState, layout = {} }: MTRBoardProps) {
         />
       ))}
 
-      {/* Empty state */}
-      {displayedArrivals.length === 0 && <MTREmptyState rows={config.rows} />}
+      {/* Filler rows to always show config.rows */}
+      {emptyRowsCount > 0 && (
+        <MTREmptyState
+          rows={emptyRowsCount}
+          startIndex={displayedArrivals.length}
+          showMessage={hasNoData}
+        />
+      )}
     </div>
   );
 }
