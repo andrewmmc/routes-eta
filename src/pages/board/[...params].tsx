@@ -26,20 +26,10 @@ export default function BoardPage() {
   const router = useRouter();
   const params = router.query.params as string[] | undefined;
 
-  // Wait for router to be ready
-  if (!router.isReady || !params) {
-    return <LoadingBoard />;
-  }
-
-  // Parse URL params
+  // Parse URL params with empty-string fallbacks so hooks are always called
   // TODO: Add proper validation
-  const [operatorId, serviceId, stopId, directionId] = params;
-
-  if (!operatorId || !serviceId || !stopId) {
-    return (
-      <ErrorDisplay message="Invalid URL parameters. Format: /board/[operator]/[service]/[station]" />
-    );
-  }
+  const [operatorId = "", serviceId = "", stopId = "", directionId] =
+    params ?? [];
 
   // Get board config (or create default)
   const config = getBoardConfigFromParams(
@@ -49,7 +39,8 @@ export default function BoardPage() {
     directionId
   );
 
-  // Fetch board data
+  // Fetch board data — hook must be called unconditionally before any returns.
+  // useBoardData skips fetching when operatorId/serviceId/stopId are empty.
   const { data, isLoading, isError, error, refresh } = useBoardData({
     operatorId,
     stopId,
@@ -57,6 +48,17 @@ export default function BoardPage() {
     directionId,
     refreshInterval: 60000, // TODO: Make configurable
   });
+
+  // Wait for router to be ready
+  if (!router.isReady || !params) {
+    return <LoadingBoard />;
+  }
+
+  if (!operatorId || !serviceId || !stopId) {
+    return (
+      <ErrorDisplay message="Invalid URL parameters. Format: /board/[operator]/[service]/[station]" />
+    );
+  }
 
   // Loading state
   if (isLoading && !data) {

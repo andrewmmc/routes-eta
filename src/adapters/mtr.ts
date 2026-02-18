@@ -14,6 +14,12 @@ import type {
   AdapterCapabilities,
 } from "./base";
 import type { BoardState } from "../models";
+import {
+  MTR_LINES,
+  getMtrStationInfo,
+  getMtrDirectionEntry,
+  getDirectionLabel,
+} from "../data/mtr";
 
 export const MTR_CAPABILITIES: AdapterCapabilities = {
   hasPlatform: true,
@@ -66,30 +72,20 @@ export const mtrAdapter: TransportAdapter = {
     // TODO: Parse and validate raw data with Zod
     // const validated = MtrApiResponseSchema.parse(raw);
 
-    // Return dummy BoardState for testing MTR UI
-    // Get line color based on service ID
-    const lineColors: Record<string, string> = {
-      TWL: "#E2231A", // Tsuen Wan Line - red
-      ISL: "#0075C2", // Island Line - blue
-      KTL: "#00A040", // Kwun Tong Line - green
-      TKL: "#7D499D", // Tseung Kwan O Line - purple
-      EAL: "#5EB6E4", // East Rail Line - light blue
-      TML: "#9A3B26", // Tuen Ma Line - brown
-      SIL: "#B5BD00", // South Island Line - lime
-      TCL: "#F7943E", // Tung Chung Line - orange
-    };
+    // Look up real line and station info from data module
+    const lineInfo = MTR_LINES[params.serviceId];
+    const stationInfo = getMtrStationInfo(params.serviceId, params.stopId);
 
-    // Get destination based on direction
-    const destinations: Record<string, { en: string; zh: string }> = {
-      TWL: { en: "Central", zh: "中環" },
-      ISL: { en: "Chai Wan", zh: "柴灣" },
-      KTL: { en: "Whampoa", zh: "黃埔" },
-      TKL: { en: "Po Lam", zh: "寶琳" },
-      EAL: { en: "Lo Wu", zh: "羅湖" },
-      TML: { en: "Tuen Mun", zh: "屯門" },
-    };
+    // Determine destination from the direction entry (last station in direction)
+    const dirEntry = params.directionId
+      ? getMtrDirectionEntry(params.serviceId, params.directionId)
+      : undefined;
+    const terminalStation = dirEntry?.stations[dirEntry.stations.length - 1];
+    const dest = terminalStation
+      ? { en: terminalStation.nameEn, zh: terminalStation.nameZh }
+      : { en: "Terminal", zh: "終點站" };
 
-    const dest = destinations[params.serviceId] || { en: "Central", zh: "中環" };
+    const directionLabel = dirEntry ? getDirectionLabel(dirEntry) : undefined;
 
     return {
       operator: {
@@ -99,50 +95,50 @@ export const mtrAdapter: TransportAdapter = {
       },
       station: {
         id: params.stopId,
-        name: "Admiralty",
-        nameZh: "金鐘",
+        name: stationInfo?.nameEn ?? params.stopId,
+        nameZh: stationInfo?.nameZh ?? params.stopId,
       },
       service: {
         id: params.serviceId,
-        name: "Tsuen Wan Line",
-        nameZh: "荃灣綫",
+        name: lineInfo?.nameEn ?? params.serviceId,
+        nameZh: lineInfo?.nameZh ?? params.serviceId,
         direction: params.directionId as "up" | "down",
-        color: lineColors[params.serviceId] || "#E2231A",
+        color: lineInfo?.color ?? "#E2231A",
       },
       direction: params.directionId as "up" | "down",
       arrivals: [
         {
-          eta: new Date(Date.now() + 30 * 1000), // Arriving soon (< 1 min)
+          eta: new Date(Date.now() + 30 * 1000),
           status: "Arriving",
           platform: "1",
-          destination: dest.en,
+          destination: directionLabel ?? dest.en,
           destinationZh: dest.zh,
           crowding: "low",
           trainLength: 8,
         },
         {
-          eta: new Date(Date.now() + 4 * 60 * 1000), // 4 mins
+          eta: new Date(Date.now() + 4 * 60 * 1000),
           status: "Scheduled",
           platform: "1",
-          destination: dest.en,
+          destination: directionLabel ?? dest.en,
           destinationZh: dest.zh,
           crowding: "medium",
           trainLength: 8,
         },
         {
-          eta: new Date(Date.now() + 8 * 60 * 1000), // 8 mins
+          eta: new Date(Date.now() + 8 * 60 * 1000),
           status: "Scheduled",
           platform: "1",
-          destination: dest.en,
+          destination: directionLabel ?? dest.en,
           destinationZh: dest.zh,
           crowding: "high",
           trainLength: 8,
         },
         {
-          eta: new Date(Date.now() + 12 * 60 * 1000), // 12 mins
+          eta: new Date(Date.now() + 12 * 60 * 1000),
           status: "Scheduled",
           platform: "1",
-          destination: dest.en,
+          destination: directionLabel ?? dest.en,
           destinationZh: dest.zh,
           crowding: "low",
           trainLength: 8,

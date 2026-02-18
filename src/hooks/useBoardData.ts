@@ -39,8 +39,11 @@ export function useBoardData({
   directionId,
   refreshInterval = 60000, // Default: 60 seconds
 }: UseBoardDataOptions): UseBoardDataReturn {
-  // Create cache key based on params
-  const cacheKey = `board-${operatorId}-${serviceId}-${stopId}-${directionId || ""}`;
+  // Null key tells SWR to skip fetching when required params are missing
+  const cacheKey =
+    operatorId && serviceId && stopId
+      ? `board-${operatorId}-${serviceId}-${stopId}-${directionId || ""}`
+      : null;
 
   const fetcher = async (): Promise<BoardState> => {
     // DUMMY IMPLEMENTATION
