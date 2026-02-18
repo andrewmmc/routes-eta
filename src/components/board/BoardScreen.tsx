@@ -65,7 +65,7 @@ export function BoardScreen({ boardState, layout = {} }: BoardScreenProps) {
 
         {/* Empty state */}
         {displayedArrivals.length === 0 && (
-          <div className="py-8 text-center text-gray-400">暫無班次資料</div>
+          <div className="py-16 text-center text-gray-400">暫無班次資料</div>
         )}
       </div>
 

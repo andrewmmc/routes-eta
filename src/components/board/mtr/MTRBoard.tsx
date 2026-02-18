@@ -44,7 +44,7 @@ export function MTRBoard({ boardState, layout = {} }: MTRBoardProps) {
 
       {/* Empty state */}
       {displayedArrivals.length === 0 && (
-        <div className="flex flex-1 items-center justify-center text-4xl text-gray-400">
+        <div className="flex flex-1 items-center justify-center py-16 text-4xl text-gray-400">
           暫無班次資料
         </div>
       )}
