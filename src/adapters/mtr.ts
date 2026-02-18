@@ -2,90 +2,169 @@
  * MTR Adapter
  *
  * Handles data fetching and transformation for MTR (Mass Transit Railway)
+ * API: https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php
  *
- * TODO: Implement actual API integration with DATA.GOV.HK
- * TODO: Add proper error handling
- * TODO: Add caching strategy
+ * API spec notes:
+ * - ttnt, valid, source are dummy fields (always N/A) — do not use for logic
+ * - timetype is EAL-only: "A" = Arrival time, "D" = Departure time
+ * - route is EAL-only: "" = Normal, "RAC" = Via Racecourse station
+ * - isdelay is optional at the top level
  */
 
-import type {
-  TransportAdapter,
-  FetchParams,
-  AdapterCapabilities,
-} from "./base";
+import { z } from "zod";
+import type { TransportAdapter, FetchParams, AdapterCapabilities } from "./base";
 import type { BoardState } from "../models";
-import {
-  MTR_LINES,
-  getMtrStationInfo,
-  getMtrDirectionEntry,
-  getDirectionLabel,
-} from "../data/mtr";
+import { MTR_LINES, getMtrStationInfo } from "../data/mtr";
+
+// ── Zod schemas ────────────────────────────────────────────────────────────────
+
+const MtrArrivalSchema = z.object({
+  // seq is documented as Numbers but the API returns it as a string
+  seq: z.coerce.number(),
+  dest: z.string(),
+  // plat is documented as Numbers but the API returns it as a string
+  plat: z.coerce.string(),
+  time: z.string(), // "YYYY-MM-DD HH:MM:SS" in HKT (UTC+8)
+  // ttnt, valid, source are dummy fields per spec — kept for schema completeness only
+  ttnt: z.union([z.string(), z.number()]).optional(),
+  valid: z.string().optional(),
+  source: z.string().optional(),
+  // EAL-only optional fields
+  timetype: z.enum(["A", "D"]).optional(), // A = Arrival, D = Departure
+  route: z.string().optional(),            // "" = Normal, "RAC" = Via Racecourse
+});
+
+const MtrLineStationDataSchema = z.object({
+  curr_time: z.string(),
+  sys_time: z.string(),
+  UP: z.array(MtrArrivalSchema).optional(),
+  DOWN: z.array(MtrArrivalSchema).optional(),
+});
+
+const MtrApiResponseSchema = z.object({
+  sys_time: z.string(),
+  curr_time: z.string(),
+  status: z.number(),
+  isdelay: z.string().optional(), // Optional per spec
+  message: z.string(),
+  data: z.record(z.string(), MtrLineStationDataSchema).optional(),
+});
+
+type MtrArrival = z.infer<typeof MtrArrivalSchema>;
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+const MTR_API_BASE = "https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php";
+
+/**
+ * Parse an HKT datetime string ("YYYY-MM-DD HH:MM:SS") to a Date object.
+ * HKT is UTC+8.
+ */
+function parseHktTime(timeStr: string): Date {
+  return new Date(timeStr.replace(" ", "T") + "+08:00");
+}
+
+/**
+ * Map the URL-friendly direction ("up" / "down") to the API key ("UP" / "DOWN").
+ */
+function toApiDirection(directionId: string | undefined): "UP" | "DOWN" | null {
+  if (!directionId) return null;
+  const upper = directionId.toUpperCase();
+  if (upper === "UP" || upper === "DOWN") return upper;
+  return null;
+}
+
+/**
+ * Derive arrival status from per-arrival timetype and global isdelay flag.
+ * timetype takes precedence as it is per-arrival; isdelay is a global fallback.
+ */
+function deriveStatus(
+  timetype: "A" | "D" | undefined,
+  isDelayed: boolean
+): string | undefined {
+  if (timetype === "A") return "Arriving";
+  if (timetype === "D") return "Departing";
+  if (isDelayed) return "Delayed";
+  return undefined;
+}
+
+// ── Adapter ────────────────────────────────────────────────────────────────────
 
 export const MTR_CAPABILITIES: AdapterCapabilities = {
   hasPlatform: true,
-  hasCrowding: true,
-  hasNextStation: true,
-  hasTrainLength: true,
+  hasCrowding: false,
+  hasNextStation: false,
+  hasTrainLength: false,
 };
 
 export const mtrAdapter: TransportAdapter = {
   operatorId: "mtr",
   capabilities: MTR_CAPABILITIES,
 
-  /**
-   * Fetch raw ETA data from MTR API
-   *
-   * TODO: Replace with actual API endpoint from DATA.GOV.HK
-   * TODO: Add proper request headers
-   * TODO: Add timeout handling
-   */
   async fetchRaw(params: FetchParams): Promise<unknown> {
-    // DUMMY IMPLEMENTATION
-    console.log("[MTR Adapter] fetchRaw called with:", params);
+    const url = new URL(MTR_API_BASE);
+    url.searchParams.set("line", params.serviceId);
+    url.searchParams.set("sta", params.stopId);
 
-    // TODO: Replace with actual API call
-    // const response = await fetch(`https://api.data.gov.hk/mtr/eta/${params.stopId}`);
-    // return response.json();
-
-    // Return dummy data for now
-    return {
-      line: params.serviceId,
-      station: params.stopId,
-      data: [],
-    };
+    const res = await fetch(url.toString());
+    if (!res.ok) {
+      throw new Error(`MTR API error: ${res.status} ${res.statusText}`);
+    }
+    return res.json();
   },
 
-  /**
-   * Transform MTR API response to unified BoardState
-   *
-   * TODO: Map actual API fields to BoardState model
-   * TODO: Handle edge cases (no data, delays, etc.)
-   * TODO: Add proper Zod validation
-   */
   async mapToBoardState(
     raw: unknown,
     params: FetchParams
   ): Promise<BoardState> {
-    // DUMMY IMPLEMENTATION
-    console.log("[MTR Adapter] mapToBoardState called with:", raw);
+    const validated = MtrApiResponseSchema.parse(raw);
 
-    // TODO: Parse and validate raw data with Zod
-    // const validated = MtrApiResponseSchema.parse(raw);
+    if (validated.status !== 1) {
+      throw new Error(`MTR API returned failure status: ${validated.message}`);
+    }
 
-    // Look up real line and station info from data module
     const lineInfo = MTR_LINES[params.serviceId];
     const stationInfo = getMtrStationInfo(params.serviceId, params.stopId);
 
-    // Determine destination from the direction entry (last station in direction)
-    const dirEntry = params.directionId
-      ? getMtrDirectionEntry(params.serviceId, params.directionId)
-      : undefined;
-    const terminalStation = dirEntry?.stations[dirEntry.stations.length - 1];
-    const dest = terminalStation
-      ? { en: terminalStation.nameEn, zh: terminalStation.nameZh }
-      : { en: "Terminal", zh: "終點站" };
+    // The data key uses the format "{LINE}-{STATION}"
+    const dataKey = `${params.serviceId}-${params.stopId}`;
+    const stationData = validated.data?.[dataKey];
 
-    const directionLabel = dirEntry ? getDirectionLabel(dirEntry) : undefined;
+    const dir = toApiDirection(params.directionId);
+    const rawArrivals: MtrArrival[] =
+      dir === "UP"
+        ? (stationData?.UP ?? [])
+        : dir === "DOWN"
+          ? (stationData?.DOWN ?? [])
+          : [...(stationData?.UP ?? []), ...(stationData?.DOWN ?? [])];
+
+    // Sort by seq ascending — do NOT filter by valid (it is a dummy field per spec)
+    const sortedArrivals = [...rawArrivals].sort((a, b) => a.seq - b.seq);
+
+    const isDelayed = validated.isdelay === "Y";
+
+    const arrivals = sortedArrivals.map((a) => {
+      const destStation = getMtrStationInfo(params.serviceId, a.dest);
+      const isViaRacecourse = a.route === "RAC";
+
+      const destination =
+        (destStation?.nameEn ?? a.dest) +
+        (isViaRacecourse ? " via Racecourse" : "");
+      const destinationZh =
+        (destStation?.nameZh ?? a.dest) + (isViaRacecourse ? " 經馬場" : "");
+
+      return {
+        eta: parseHktTime(a.time),
+        status: deriveStatus(a.timetype, isDelayed),
+        platform: a.plat,
+        destination,
+        destinationZh,
+      };
+    });
+
+    const lastUpdated = stationData?.curr_time
+      ? parseHktTime(stationData.curr_time)
+      : new Date();
 
     return {
       operator: {
@@ -106,45 +185,8 @@ export const mtrAdapter: TransportAdapter = {
         color: lineInfo?.color ?? "#E2231A",
       },
       direction: params.directionId as "up" | "down",
-      arrivals: [
-        {
-          eta: new Date(Date.now() + 30 * 1000),
-          status: "Arriving",
-          platform: "1",
-          destination: directionLabel ?? dest.en,
-          destinationZh: dest.zh,
-          crowding: "low",
-          trainLength: 8,
-        },
-        {
-          eta: new Date(Date.now() + 4 * 60 * 1000),
-          status: "Scheduled",
-          platform: "1",
-          destination: directionLabel ?? dest.en,
-          destinationZh: dest.zh,
-          crowding: "medium",
-          trainLength: 8,
-        },
-        {
-          eta: new Date(Date.now() + 8 * 60 * 1000),
-          status: "Scheduled",
-          platform: "1",
-          destination: directionLabel ?? dest.en,
-          destinationZh: dest.zh,
-          crowding: "high",
-          trainLength: 8,
-        },
-        {
-          eta: new Date(Date.now() + 12 * 60 * 1000),
-          status: "Scheduled",
-          platform: "1",
-          destination: directionLabel ?? dest.en,
-          destinationZh: dest.zh,
-          crowding: "low",
-          trainLength: 8,
-        },
-      ],
-      lastUpdated: new Date(),
+      arrivals,
+      lastUpdated,
     };
   },
 };
