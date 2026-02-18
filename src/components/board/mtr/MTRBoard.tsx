@@ -10,6 +10,7 @@ import type { BoardState } from "../../../models";
 import type { BoardLayoutConfig } from "../../../config";
 import { MTRHeader } from "./MTRHeader";
 import { MTRArrivalRow } from "./MTRArrivalRow";
+import { MTREmptyState } from "./MTREmptyState";
 
 export interface MTRBoardProps {
   boardState: BoardState;
@@ -42,20 +43,8 @@ export function MTRBoard({ boardState, layout = {} }: MTRBoardProps) {
         />
       ))}
 
-      {/* Empty state - render 4 placeholder rows */}
-      {displayedArrivals.length === 0 &&
-        Array.from({ length: config.rows }).map((_, index) => (
-          <div
-            key={index}
-            className={`flex flex-1 items-center justify-center ${
-              index % 2 === 0 ? "bg-white" : "bg-[#d6eaf8]"
-            }`}
-          >
-            {index === Math.floor(config.rows / 2) && (
-              <span className="text-4xl text-gray-400">暫無班次資料</span>
-            )}
-          </div>
-        ))}
+      {/* Empty state */}
+      {displayedArrivals.length === 0 && <MTREmptyState rows={config.rows} />}
     </div>
   );
 }
