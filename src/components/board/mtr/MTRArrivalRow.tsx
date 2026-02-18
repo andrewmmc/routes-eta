@@ -6,17 +6,32 @@
  */
 
 import type { Arrival } from "../../../models";
+import type { Language } from "./MTRBoard";
 
 export interface MTRArrivalRowProps {
   arrival: Arrival;
   index: number;
   lineColor?: string;
+  language: Language;
 }
+
+// Text labels for each language
+const LABELS = {
+  zh: {
+    arriving: "即將抵達",
+    minutes: "分鐘",
+  },
+  en: {
+    arriving: "Arriving",
+    minutes: "min",
+  },
+} as const;
 
 export function MTRArrivalRow({
   arrival,
   index,
   lineColor = "#E2231A",
+  language,
 }: MTRArrivalRowProps) {
   // Alternating row colors (zebra striping)
   const isEven = index % 2 === 0;
@@ -25,14 +40,21 @@ export function MTRArrivalRow({
   // Determine if arriving soon (within 1 minute)
   const isArrivingSoon = isArriving(arrival.eta);
 
+  // Get text based on current language
+  const labels = LABELS[language];
+
+  // Get destination based on language
+  const destination =
+    language === "zh"
+      ? arrival.destinationZh || arrival.destination
+      : arrival.destination;
+
   return (
     <div
       className={`flex flex-1 items-center justify-between px-16 ${bgColor}`}
     >
       {/* Left: Destination */}
-      <span className="text-7xl font-bold text-black">
-        {arrival.destinationZh || arrival.destination}
-      </span>
+      <span className="text-7xl font-bold text-black">{destination}</span>
 
       {/* Right: Platform circle + ETA in separate columns */}
       <div className="flex items-center">
@@ -52,13 +74,15 @@ export function MTRArrivalRow({
             // Train has arrived - leave column empty
             null
           ) : isArrivingSoon ? (
-            <span className="text-6xl font-bold text-black">即將抵達</span>
+            <span className="text-6xl font-bold text-black">
+              {labels.arriving}
+            </span>
           ) : (
             <>
               <span className="text-7xl font-bold text-black">
                 {formatETAMinutes(arrival.eta)}
               </span>
-              <span className="text-5xl text-black">分鐘</span>
+              <span className="text-5xl text-black">{labels.minutes}</span>
             </>
           )}
         </div>

@@ -6,11 +6,14 @@
  * Strictly follows MTR station screen design
  */
 
+import { useState, useEffect } from "react";
 import type { BoardState } from "../../../models";
 import type { BoardLayoutConfig } from "../../../config";
 import { MTRHeader } from "./MTRHeader";
 import { MTRArrivalRow } from "./MTRArrivalRow";
 import { MTREmptyState } from "./MTREmptyState";
+
+export type Language = "zh" | "en";
 
 export interface MTRBoardProps {
   boardState: BoardState;
@@ -18,6 +21,17 @@ export interface MTRBoardProps {
 }
 
 export function MTRBoard({ boardState, layout = {} }: MTRBoardProps) {
+  const [language, setLanguage] = useState<Language>("zh");
+
+  // Toggle language every 10 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setLanguage((prev) => (prev === "zh" ? "en" : "zh"));
+    }, 10000);
+
+    return () => clearInterval(timer);
+  }, []);
+
   const config: BoardLayoutConfig = {
     rows: layout.rows ?? 4,
     columns: layout.columns ?? 1,
@@ -42,6 +56,7 @@ export function MTRBoard({ boardState, layout = {} }: MTRBoardProps) {
           arrival={arrival}
           index={index}
           lineColor={boardState.service.color}
+          language={language}
         />
       ))}
 
@@ -51,6 +66,7 @@ export function MTRBoard({ boardState, layout = {} }: MTRBoardProps) {
           rows={emptyRowsCount}
           startIndex={displayedArrivals.length}
           showMessage={hasNoData}
+          language={language}
         />
       )}
     </div>
