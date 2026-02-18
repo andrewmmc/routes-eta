@@ -22,22 +22,14 @@ export interface MTRBoardProps {
 
 export function MTRBoard({ boardState, layout = {} }: MTRBoardProps) {
   const [language, setLanguage] = useState<Language>("zh");
-  const [now, setNow] = useState(Date.now);
+  // Lazy init - runs once on mount, acceptable since data refreshes every 60s
+  const [now] = useState(() => Date.now());
 
   // Toggle language every 10 seconds
   useEffect(() => {
     const timer = setInterval(() => {
       setLanguage((prev) => (prev === "zh" ? "en" : "zh"));
     }, 10000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  // Update current time every minute for filtering
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setNow(Date.now());
-    }, 60000);
 
     return () => clearInterval(timer);
   }, []);
