@@ -42,12 +42,20 @@ export function MTRBoard({ boardState, layout = {} }: MTRBoardProps) {
         />
       ))}
 
-      {/* Empty state */}
-      {displayedArrivals.length === 0 && (
-        <div className="flex flex-1 items-center justify-center py-16 text-4xl text-gray-400">
-          暫無班次資料
-        </div>
-      )}
+      {/* Empty state - render 4 placeholder rows */}
+      {displayedArrivals.length === 0 &&
+        Array.from({ length: config.rows }).map((_, index) => (
+          <div
+            key={index}
+            className={`flex flex-1 items-center justify-center ${
+              index % 2 === 0 ? "bg-white" : "bg-[#d6eaf8]"
+            }`}
+          >
+            {index === Math.floor(config.rows / 2) && (
+              <span className="text-4xl text-gray-400">暫無班次資料</span>
+            )}
+          </div>
+        ))}
     </div>
   );
 }
