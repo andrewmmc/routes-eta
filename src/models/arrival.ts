@@ -14,6 +14,7 @@ export interface Arrival {
   destinationZh?: string;
   crowding?: CrowdingLevel; // Optional crowding level
   trainLength?: number; // Number of cars (MTR specific)
+  isArrived?: boolean; // MTR-specific: train has arrived (curr_time equals arrival time)
 }
 
 // TODO: Add helper functions for formatting arrival time

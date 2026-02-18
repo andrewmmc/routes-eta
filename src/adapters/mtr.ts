@@ -153,12 +153,16 @@ export const mtrAdapter: TransportAdapter = {
       const destinationZh =
         (destStation?.nameZh ?? a.dest) + (isViaRacecourse ? " 經馬場" : "");
 
+      // Check if train has arrived: curr_time equals arrival time
+      const isArrived = stationData?.curr_time === a.time;
+
       return {
         eta: parseHktTime(a.time),
         status: deriveStatus(a.timetype, isDelayed),
         platform: a.plat,
         destination,
         destinationZh,
+        isArrived,
       };
     });
 

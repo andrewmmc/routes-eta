@@ -48,7 +48,10 @@ export function MTRArrivalRow({
 
         {/* Column 2: ETA */}
         <div className="flex min-w-[320px] items-center justify-end gap-4">
-          {isArrivingSoon ? (
+          {arrival.isArrived ? (
+            // Train has arrived - leave column empty
+            null
+          ) : isArrivingSoon ? (
             <span className="text-6xl font-bold text-black">即將抵達</span>
           ) : (
             <>
