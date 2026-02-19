@@ -27,6 +27,8 @@ export function MTREmptyState({
   language,
 }: MTREmptyStateProps) {
   const message = LABELS[language];
+  const textFontClass =
+    language === "zh" ? "font-mtr-chinese" : "font-mtr-english";
 
   return (
     <>
@@ -38,7 +40,9 @@ export function MTREmptyState({
           }`}
         >
           {showMessage && index === 0 && (
-            <span className="text-4xl text-gray-400">{message}</span>
+            <span className={`text-4xl text-gray-400 ${textFontClass}`}>
+              {message}
+            </span>
           )}
         </div>
       ))}

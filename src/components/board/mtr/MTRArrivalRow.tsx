@@ -49,19 +49,25 @@ export function MTRArrivalRow({
       ? arrival.destinationZh || arrival.destination
       : arrival.destination;
 
+  // Font class based on language
+  const textFontClass =
+    language === "zh" ? "font-mtr-chinese" : "font-mtr-english";
+
   return (
     <div
       className={`flex flex-1 items-center justify-between px-16 ${bgColor}`}
     >
       {/* Left: Destination */}
-      <span className="text-7xl font-bold text-black">{destination}</span>
+      <span className={`text-7xl text-black ${textFontClass}`}>
+        {destination}
+      </span>
 
       {/* Right: Platform circle + ETA in separate columns */}
       <div className="flex items-center">
         {/* Column 1: Platform circle */}
         <div className="flex w-28 items-center justify-center">
           <div
-            className="flex h-20 w-20 items-center justify-center rounded-full text-4xl font-bold text-white"
+            className="flex h-20 w-20 items-center justify-center rounded-full text-4xl font-mtr-english text-white"
             style={{ backgroundColor: lineColor }}
           >
             {arrival.platform}
@@ -74,15 +80,17 @@ export function MTRArrivalRow({
             // Train has arrived - leave column empty
             null
           ) : isArrivingSoon ? (
-            <span className="text-6xl font-bold text-black">
+            <span className={`text-6xl text-black ${textFontClass}`}>
               {labels.arriving}
             </span>
           ) : (
             <>
-              <span className="text-7xl font-bold text-black">
+              <span className="text-7xl font-mtr-english text-black">
                 {formatETAMinutes(arrival.eta)}
               </span>
-              <span className="text-5xl text-black">{labels.minutes}</span>
+              <span className={`text-5xl text-black ${textFontClass}`}>
+                {labels.minutes}
+              </span>
             </>
           )}
         </div>

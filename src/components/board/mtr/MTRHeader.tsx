@@ -38,11 +38,13 @@ export function MTRHeader() {
           <WeatherIcon />
         </div>
         {/* Temperature placeholder */}
-        <span className="text-5xl font-semibold">--°C</span>
+        <span className="text-5xl font-mtr-english">--°C</span>
       </div>
 
       {/* Right: Current time */}
-      <div className="text-7xl font-bold tracking-wider">{formattedTime}</div>
+      <div className="text-7xl font-mtr-english tracking-wider">
+        {formattedTime}
+      </div>
     </Link>
   );
 }
