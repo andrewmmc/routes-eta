@@ -92,7 +92,7 @@ The board page (`src/pages/board/[...params].tsx`) renders `MTRBoard` for MTR an
 ### Static MTR Data
 
 - `src/data/mtr.ts` — MTR line definitions (10 lines: AEL, DRL, EAL, ISL, KTL, SIL, TCL, TKL, TML, TWL), helpers: `getMtrLineDirections()`, `getMtrStationInfo()`, `getMtrDirectionEntry()`
-- `src/data/mtr-directions.generated.ts` — Auto-generated from CSV; **do not edit manually**. Regenerate with `npm run generate:mtr`
+- `src/data/mtr-directions.generated.ts` — Auto-generated from `assets/mtr_lines_and_stations.csv`; **do not edit manually**. Regenerate with `npm run generate:mtr`
 
 ### Key Directories
 

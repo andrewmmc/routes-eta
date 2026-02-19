@@ -53,12 +53,12 @@ This allows adding new operators without modifying UI components.
 
 Each adapter declares what features it supports:
 
-| Capability | Description |
-|------------|-------------|
-| `hasPlatform` | Show platform number (MTR: yes) |
-| `hasCrowding` | Show crowding level (planned) |
+| Capability       | Description                      |
+| ---------------- | -------------------------------- |
+| `hasPlatform`    | Show platform number (MTR: yes)  |
+| `hasCrowding`    | Show crowding level (planned)    |
 | `hasNextStation` | Show next station info (planned) |
-| `hasTrainLength` | Show train car count (planned) |
+| `hasTrainLength` | Show train car count (planned)   |
 
 ## Scripts
 
@@ -75,7 +75,7 @@ npm run generate:mtr  # Regenerate MTR data from CSV
 
 ## MTR Data Generation
 
-MTR line and station data is generated from `src/data/mtr_lines_and_stations.csv` using the `scripts/generate-mtr-data.ts` script.
+MTR line and station data is generated from `assets/mtr_lines_and_stations.csv` using the `scripts/generate-mtr-data.ts` script.
 
 ### Branch Line Handling
 

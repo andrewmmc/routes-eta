@@ -1,5 +1,5 @@
 /**
- * Generates src/data/mtr-directions.generated.ts from mtr_lines_and_stations.csv
+ * Generates src/data/mtr-directions.generated.ts from assets/mtr_lines_and_stations.csv
  *
  * Rules applied during generation:
  * - Only DT (down) and UT (up) directions are output
@@ -68,9 +68,21 @@ const DIRECTION_MERGE_MAP: Record<string, "DT" | "UT"> = {
  */
 const ADDITIONAL_STATIONS: Record<string, Station> = {
   // Racecourse (RAC) operates between University (UNI, seq 6) and Fo Tan (FOT, seq 7) on EAL DT
-  "EAL-DT-RAC": { code: "RAC", id: "70", nameZh: "馬場", nameEn: "Racecourse", sequence: 6.5 },
+  "EAL-DT-RAC": {
+    code: "RAC",
+    id: "70",
+    nameZh: "馬場",
+    nameEn: "Racecourse",
+    sequence: 6.5,
+  },
   // Racecourse (RAC) operates between Fo Tan (FOT, seq 8) and University (UNI, seq 9) on EAL UT
-  "EAL-UT-RAC": { code: "RAC", id: "70", nameZh: "馬場", nameEn: "Racecourse", sequence: 8.5 },
+  "EAL-UT-RAC": {
+    code: "RAC",
+    id: "70",
+    nameZh: "馬場",
+    nameEn: "Racecourse",
+    sequence: 8.5,
+  },
 };
 
 /**
@@ -208,7 +220,8 @@ function buildDirections(rows: CsvRow[]): DirectionEntry[] {
     if (!group.has(row.stationCode)) {
       // Apply sequence adjustment for branch-only stations
       const adjustmentKey = `${row.lineCode}-${direction}-${row.stationCode}`;
-      const adjustedSequence = SEQUENCE_ADJUSTMENTS[adjustmentKey] ?? row.sequence;
+      const adjustedSequence =
+        SEQUENCE_ADJUSTMENTS[adjustmentKey] ?? row.sequence;
 
       group.set(row.stationCode, {
         code: row.stationCode,
@@ -312,11 +325,19 @@ function generateOutput(entries: DirectionEntry[]): string {
   ].join("\n");
 }
 
+// ─── Exports (for testing) ────────────────────────────────────────────────────
+
+export { parseCsvLine, parseCsv, buildDirections, generateOutput };
+export type { CsvRow, Station, DirectionEntry };
+
 // ─── Entry Point ──────────────────────────────────────────────────────────────
 
 function main() {
-  const csvPath = path.join(__dirname, "../src/data/mtr_lines_and_stations.csv");
-  const outputPath = path.join(__dirname, "../src/data/mtr-directions.generated.ts");
+  const csvPath = path.join(__dirname, "../assets/mtr_lines_and_stations.csv");
+  const outputPath = path.join(
+    __dirname,
+    "../src/data/mtr-directions.generated.ts"
+  );
 
   const csvContent = fs.readFileSync(csvPath, "utf-8");
   const rows = parseCsv(csvContent);
@@ -329,4 +350,12 @@ function main() {
   console.log(`Written to ${outputPath}`);
 }
 
-main();
+// Only run when executed directly (not imported by tests)
+const isMain =
+  process.argv[1] &&
+  path.resolve(process.argv[1]) ===
+    path.resolve(fileURLToPath(import.meta.url));
+
+if (isMain) {
+  main();
+}

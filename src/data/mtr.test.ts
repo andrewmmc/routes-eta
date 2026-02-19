@@ -120,9 +120,62 @@ describe("getDirectionLabelZh", () => {
   });
 });
 
+describe("getDirectionLabel — branch lines", () => {
+  it("shows alternative termini for TKL UT (up)", () => {
+    const entry = getMtrDirectionEntry("TKL", "up");
+    expect(entry).toBeDefined();
+    expect(getDirectionLabel(entry!)).toBe("North Point → LOHAS Park/Po Lam");
+  });
+
+  it("shows alternative termini for TKL DT (down)", () => {
+    const entry = getMtrDirectionEntry("TKL", "down");
+    expect(entry).toBeDefined();
+    expect(getDirectionLabel(entry!)).toBe("LOHAS Park/Po Lam → North Point");
+  });
+
+  it("shows alternative termini for EAL UT (up)", () => {
+    const entry = getMtrDirectionEntry("EAL", "up");
+    expect(entry).toBeDefined();
+    // Termini sorted alphabetically by code: LMC < LOW
+    expect(getDirectionLabel(entry!)).toBe("Admiralty → Lok Ma Chau/Lo Wu");
+  });
+
+  it("shows alternative termini for EAL DT (down)", () => {
+    const entry = getMtrDirectionEntry("EAL", "down");
+    expect(entry).toBeDefined();
+    expect(getDirectionLabel(entry!)).toBe("Lok Ma Chau/Lo Wu → Admiralty");
+  });
+});
+
+describe("getDirectionLabelZh — branch lines", () => {
+  it("shows alternative termini for TKL UT in Chinese", () => {
+    const entry = getMtrDirectionEntry("TKL", "up");
+    expect(entry).toBeDefined();
+    expect(getDirectionLabelZh(entry!)).toBe("北角 → 康城/寶琳");
+  });
+
+  it("shows alternative termini for EAL UT in Chinese", () => {
+    const entry = getMtrDirectionEntry("EAL", "up");
+    expect(entry).toBeDefined();
+    // Termini sorted alphabetically by code: LMC < LOW
+    expect(getDirectionLabelZh(entry!)).toBe("金鐘 → 落馬洲/羅湖");
+  });
+});
+
 describe("MTR_LINES", () => {
   it("contains all expected lines", () => {
-    const expectedLines = ["AEL", "DRL", "EAL", "ISL", "KTL", "TML", "TCL", "TKL", "TWL", "SIL"];
+    const expectedLines = [
+      "AEL",
+      "DRL",
+      "EAL",
+      "ISL",
+      "KTL",
+      "TML",
+      "TCL",
+      "TKL",
+      "TWL",
+      "SIL",
+    ];
 
     for (const line of expectedLines) {
       expect(MTR_LINES[line]).toBeDefined();
