@@ -8,6 +8,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { MTR_COLORS, MTR_LAYOUT, MTR_TIMING } from "@/utils/styles";
 
 export function MTRHeader() {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -15,7 +16,7 @@ export function MTRHeader() {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
-    }, 1000);
+    }, MTR_TIMING.clockUpdateMs);
 
     return () => clearInterval(timer);
   }, []);
@@ -29,52 +30,15 @@ export function MTRHeader() {
   return (
     <Link
       href="/"
-      className="flex flex-[0.75] cursor-pointer items-center justify-between bg-[#1a3a5f] px-16 text-white"
+      className={`flex ${MTR_LAYOUT.headerFlex} cursor-pointer items-center justify-between ${MTR_LAYOUT.paddingX} text-white`}
+      style={{ backgroundColor: MTR_COLORS.headerBg }}
     >
       {/* Left: Weather placeholder */}
-      <div className="flex items-center gap-6">
-        {/* Weather icon placeholder */}
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/20">
-          <WeatherIcon />
-        </div>
-        {/* Temperature placeholder */}
-        <span className="text-5xl font-mtr-english">--°C</span>
-      </div>
+      <span className="text-5xl font-mtr-english">--°C</span>
 
       {/* Right: Current time */}
-      <div className="text-7xl font-mtr-english tracking-wider">
-        {formattedTime}
-      </div>
+      <div className="text-7xl font-mtr-english">{formattedTime}</div>
     </Link>
-  );
-}
-
-/**
- * Weather Icon (placeholder)
- *
- * TODO: Replace with actual weather data integration
- */
-function WeatherIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="white"
-      className="h-10 w-10"
-    >
-      {/* Sun icon as placeholder */}
-      <circle cx="12" cy="12" r="5" fill="white" />
-      <g stroke="white" strokeWidth="2" strokeLinecap="round">
-        <line x1="12" y1="1" x2="12" y2="3" />
-        <line x1="12" y1="21" x2="12" y2="23" />
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-        <line x1="1" y1="12" x2="3" y2="12" />
-        <line x1="21" y1="12" x2="23" y2="12" />
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-      </g>
-    </svg>
   );
 }
 

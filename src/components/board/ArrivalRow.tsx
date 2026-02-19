@@ -9,7 +9,6 @@
  */
 
 import type { Arrival } from "../../models";
-import { formatETA } from "../../lib/api";
 import { useTranslation } from "@/hooks/useTranslation";
 import { getLocalizedName } from "@/utils/localization";
 
@@ -95,6 +94,17 @@ function CrowdingIndicator({ level }: { level: string }) {
       title={`Crowding: ${level}`}
     />
   );
+}
+
+export function formatETA(eta: Date | null): string {
+  if (!eta) return "--";
+
+  const diffMs = eta.getTime() - Date.now();
+  const diffMins = Math.round(diffMs / 60000);
+
+  if (diffMins <= 0) return "Arr";
+  if (diffMins === 1) return "1 min";
+  return `${diffMins} mins`;
 }
 
 export default ArrivalRow;
