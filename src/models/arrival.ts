@@ -6,6 +6,20 @@
 
 export type CrowdingLevel = "low" | "medium" | "high";
 
+/**
+ * Arrival status constants
+ */
+export const ARRIVAL_STATUS = {
+  ARRIVING: "Arriving",
+  DEPARTING: "Departing",
+  DELAYED: "Delayed",
+  SCHEDULED: "Scheduled",
+  CANCELLED: "Cancelled",
+} as const;
+
+export type ArrivalStatus =
+  (typeof ARRIVAL_STATUS)[keyof typeof ARRIVAL_STATUS];
+
 export interface Arrival {
   eta: Date | null; // Estimated arrival time
   status?: string; // e.g., "Departed", "Arriving", "Delayed"
@@ -16,6 +30,3 @@ export interface Arrival {
   trainLength?: number; // Number of cars (MTR specific)
   isArrived?: boolean; // MTR-specific: train has arrived (curr_time equals arrival time)
 }
-
-// TODO: Add helper functions for formatting arrival time
-// TODO: Add status constants/enums

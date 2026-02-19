@@ -27,6 +27,7 @@ export interface AdapterCapabilities {
   hasCrowding: boolean; // MTR: yes
   hasNextStation: boolean; // Ferry: no
   hasTrainLength: boolean; // MTR: yes
+  hasCustomUI: boolean; // MTR: yes (uses MTRBoard), others: no (use generic BoardScreen)
 }
 
 /**

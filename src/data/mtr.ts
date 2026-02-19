@@ -5,6 +5,7 @@
  */
 
 import { MTR_LINE_DIRECTIONS as _directions } from "./mtr-directions.generated";
+import type { Language } from "@/types/language";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -147,34 +148,30 @@ function formatTermini(
   return names.join("/");
 }
 
-/** Returns "First Station → Last Station" label in English. */
-export function getDirectionLabel(entry: MtrDirectionEntry): string {
-  const startLabel = formatTermini(
-    entry.startTermini,
-    entry.stations,
-    (s) => s.nameEn
-  );
-  const endLabel = formatTermini(
-    entry.endTermini,
-    entry.stations,
-    (s) => s.nameEn
-  );
+/**
+ * Get direction label with language support
+ * @param entry - MTR direction entry
+ * @param language - "en" for English, "zh" for Chinese
+ * @returns Direction label like "Central → Tsuen Wan" or "中環 → 荃灣"
+ */
+export function getDirectionLabel(
+  entry: MtrDirectionEntry,
+  language: Language = "en"
+): string {
+  const getName =
+    language === "zh"
+      ? (s: MtrStationEntry) => s.nameZh
+      : (s: MtrStationEntry) => s.nameEn;
+  const startLabel = formatTermini(entry.startTermini, entry.stations, getName);
+  const endLabel = formatTermini(entry.endTermini, entry.stations, getName);
   if (!startLabel || !endLabel) return entry.direction;
   return `${startLabel} → ${endLabel}`;
 }
 
-/** Returns "首站 → 終站" label in Chinese. */
+/**
+ * Get direction label in Chinese
+ * @deprecated Use `getDirectionLabel(entry, "zh")` instead
+ */
 export function getDirectionLabelZh(entry: MtrDirectionEntry): string {
-  const startLabel = formatTermini(
-    entry.startTermini,
-    entry.stations,
-    (s) => s.nameZh
-  );
-  const endLabel = formatTermini(
-    entry.endTermini,
-    entry.stations,
-    (s) => s.nameZh
-  );
-  if (!startLabel || !endLabel) return entry.direction;
-  return `${startLabel} → ${endLabel}`;
+  return getDirectionLabel(entry, "zh");
 }

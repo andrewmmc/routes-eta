@@ -6,7 +6,14 @@
  */
 
 import type { Arrival } from "../../../models";
-import type { Language } from "./MTRBoard";
+import type { Language } from "@/types/language";
+import { getMtrLabels } from "@/constants/mtr-labels";
+import {
+  getRowBgClass,
+  getLanguageFontClass,
+  MTR_COLORS,
+  MTR_TIMING,
+} from "@/utils/styles";
 
 export interface MTRArrivalRowProps {
   arrival: Arrival;
@@ -15,33 +22,19 @@ export interface MTRArrivalRowProps {
   language: Language;
 }
 
-// Text labels for each language
-const LABELS = {
-  zh: {
-    arriving: "即將抵達",
-    minutes: "分鐘",
-  },
-  en: {
-    arriving: "Arriving",
-    minutes: "min",
-  },
-} as const;
-
 export function MTRArrivalRow({
   arrival,
   index,
-  lineColor = "#E2231A",
+  lineColor = MTR_COLORS.defaultLine,
   language,
 }: MTRArrivalRowProps) {
-  // Alternating row colors (zebra striping)
-  const isEven = index % 2 === 0;
-  const bgColor = isEven ? "bg-white" : "bg-[#d6eaf8]";
+  const bgColor = getRowBgClass(index);
 
   // Determine if arriving soon (within 1 minute)
   const isArrivingSoon = isArriving(arrival.eta);
 
   // Get text based on current language
-  const labels = LABELS[language];
+  const labels = getMtrLabels(language);
 
   // Get destination based on language
   const destination =
@@ -50,8 +43,7 @@ export function MTRArrivalRow({
       : arrival.destination;
 
   // Font class based on language
-  const textFontClass =
-    language === "zh" ? "font-mtr-chinese" : "font-mtr-english";
+  const textFontClass = getLanguageFontClass(language);
 
   return (
     <div
@@ -97,12 +89,12 @@ export function MTRArrivalRow({
 }
 
 /**
- * Check if train is arriving (within 1 minute)
+ * Check if train is arriving (within threshold)
  */
 function isArriving(eta: Date | null): boolean {
   if (!eta) return false;
   const diffMs = eta.getTime() - Date.now();
-  return diffMs <= 60000;
+  return diffMs <= MTR_TIMING.arrivingThresholdMs;
 }
 
 /**

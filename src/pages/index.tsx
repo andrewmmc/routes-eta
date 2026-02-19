@@ -12,7 +12,6 @@ import {
   MTR_LINE_DIRECTIONS,
   getMtrLineDirections,
   getDirectionLabel,
-  getDirectionLabelZh,
   type MtrDirectionEntry,
   type MtrStationEntry,
 } from "../data/mtr";
@@ -169,9 +168,7 @@ export default function HomePage() {
                 <option value="">{t("home.selectDirection")}</option>
                 {directions.map((d) => (
                   <option key={d.urlDirection} value={d.urlDirection}>
-                    {language === "zh"
-                      ? getDirectionLabelZh(d)
-                      : getDirectionLabel(d)}
+                    {getDirectionLabel(d, language)}
                   </option>
                 ))}
               </select>

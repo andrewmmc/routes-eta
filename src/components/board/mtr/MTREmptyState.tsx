@@ -5,13 +5,9 @@
  * Renders rows with zebra stripe pattern
  */
 
-import type { Language } from "./MTRBoard";
-
-// Text labels for each language
-const LABELS = {
-  zh: "暫無班次資料",
-  en: "No schedule information",
-} as const;
+import type { Language } from "@/types/language";
+import { getMtrLabels } from "@/constants/mtr-labels";
+import { getRowBgClass, getLanguageFontClass } from "@/utils/styles";
 
 export interface MTREmptyStateProps {
   rows: number;
@@ -26,22 +22,19 @@ export function MTREmptyState({
   showMessage = true,
   language,
 }: MTREmptyStateProps) {
-  const message = LABELS[language];
-  const textFontClass =
-    language === "zh" ? "font-mtr-chinese" : "font-mtr-english";
+  const labels = getMtrLabels(language);
+  const textFontClass = getLanguageFontClass(language);
 
   return (
     <>
       {Array.from({ length: rows }).map((_, index) => (
         <div
           key={index}
-          className={`flex flex-1 items-center justify-center ${
-            (startIndex + index) % 2 === 0 ? "bg-white" : "bg-[#d6eaf8]"
-          }`}
+          className={`flex flex-1 items-center justify-center ${getRowBgClass(startIndex + index)}`}
         >
           {showMessage && index === 0 && (
             <span className={`text-4xl text-gray-400 ${textFontClass}`}>
-              {message}
+              {labels.noSchedule}
             </span>
           )}
         </div>

@@ -24,6 +24,7 @@ import { ErrorDisplay } from "../../components/ui/ErrorDisplay";
 import { getBoardConfigFromParams } from "../../config";
 import { useTranslation } from "@/hooks/useTranslation";
 import { getLocalizedName, formatLocalizedTime } from "@/utils/localization";
+import { getAdapter } from "../../adapters";
 
 export default function BoardPage() {
   const router = useRouter();
@@ -82,8 +83,14 @@ export default function BoardPage() {
     return <ErrorDisplay message="No data available" onRetry={refresh} />;
   }
 
-  // Render board - use MTR skin for MTR operator
-  const isMTR = operatorId === "mtr";
+  // Render board - use custom UI if adapter supports it
+  let useCustomUI = false;
+  try {
+    const adapter = getAdapter(operatorId as "mtr");
+    useCustomUI = adapter.capabilities.hasCustomUI;
+  } catch {
+    // Unknown operator - fall back to generic UI
+  }
 
   // Format last updated for page title
   const lastUpdatedStr = formatLocalizedTime(data.lastUpdated, language);
@@ -94,7 +101,7 @@ export default function BoardPage() {
 
   const pageTitle = `${stationName} | ${serviceName} | ${updateLabel}: ${lastUpdatedStr}`;
 
-  if (isMTR) {
+  if (useCustomUI) {
     return (
       <>
         <Head>
@@ -124,17 +131,3 @@ export default function BoardPage() {
     </>
   );
 }
-
-/**
- * Get server-side props
- *
- * TODO: Implement for SSR/SSG
- * TODO: Add proper param validation
- */
-// export async function getServerSideProps(context: GetServerSidePropsContext) {
-//   const { params } = context;
-//
-//   // Validate params
-//   // Fetch initial data
-//   // Return props
-// }

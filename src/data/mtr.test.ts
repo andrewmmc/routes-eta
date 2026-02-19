@@ -86,12 +86,30 @@ describe("getMtrDirectionEntry", () => {
 });
 
 describe("getDirectionLabel", () => {
-  it("returns formatted label in English", () => {
+  it("returns formatted label in English (default)", () => {
     const entry = getMtrDirectionEntry("TWL", "up");
     if (entry) {
       const label = getDirectionLabel(entry);
       // Should contain arrow and station names
       expect(label).toContain("→");
+    }
+  });
+
+  it("returns formatted label in English when language='en'", () => {
+    const entry = getMtrDirectionEntry("TWL", "up");
+    if (entry) {
+      const label = getDirectionLabel(entry, "en");
+      expect(label).toContain("→");
+    }
+  });
+
+  it("returns formatted label in Chinese when language='zh'", () => {
+    const entry = getMtrDirectionEntry("TWL", "up");
+    if (entry) {
+      const label = getDirectionLabel(entry, "zh");
+      expect(label).toContain("→");
+      // Should contain Chinese characters
+      expect(label).toMatch(/[\u4e00-\u9fff]/);
     }
   });
 
@@ -109,7 +127,7 @@ describe("getDirectionLabel", () => {
   });
 });
 
-describe("getDirectionLabelZh", () => {
+describe("getDirectionLabelZh (deprecated)", () => {
   it("returns formatted label in Chinese", () => {
     const entry = getMtrDirectionEntry("TWL", "up");
     if (entry) {
@@ -147,18 +165,18 @@ describe("getDirectionLabel — branch lines", () => {
   });
 });
 
-describe("getDirectionLabelZh — branch lines", () => {
+describe("getDirectionLabel — branch lines (Chinese)", () => {
   it("shows alternative termini for TKL UT in Chinese", () => {
     const entry = getMtrDirectionEntry("TKL", "up");
     expect(entry).toBeDefined();
-    expect(getDirectionLabelZh(entry!)).toBe("北角 → 康城/寶琳");
+    expect(getDirectionLabel(entry!, "zh")).toBe("北角 → 康城/寶琳");
   });
 
   it("shows alternative termini for EAL UT in Chinese", () => {
     const entry = getMtrDirectionEntry("EAL", "up");
     expect(entry).toBeDefined();
     // Termini sorted alphabetically by code: LMC < LOW
-    expect(getDirectionLabelZh(entry!)).toBe("金鐘 → 落馬洲/羅湖");
+    expect(getDirectionLabel(entry!, "zh")).toBe("金鐘 → 落馬洲/羅湖");
   });
 });
 

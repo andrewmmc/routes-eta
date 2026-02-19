@@ -9,11 +9,13 @@
 import { useState, useEffect } from "react";
 import type { BoardState } from "../../../models";
 import type { BoardLayoutConfig } from "../../../config";
+import type { Language } from "@/types/language";
+import { MTR_LAYOUT, MTR_TIMING } from "@/utils/styles";
 import { MTRHeader } from "./MTRHeader";
 import { MTRArrivalRow } from "./MTRArrivalRow";
 import { MTREmptyState } from "./MTREmptyState";
 
-export type Language = "zh" | "en";
+export type { Language } from "@/types/language";
 
 export interface MTRBoardProps {
   boardState: BoardState;
@@ -23,17 +25,17 @@ export interface MTRBoardProps {
 export function MTRBoard({ boardState, layout = {} }: MTRBoardProps) {
   const [language, setLanguage] = useState<Language>("zh");
 
-  // Toggle language every 10 seconds
+  // Toggle language periodically
   useEffect(() => {
     const timer = setInterval(() => {
       setLanguage((prev) => (prev === "zh" ? "en" : "zh"));
-    }, 10000);
+    }, MTR_TIMING.languageToggleMs);
 
     return () => clearInterval(timer);
   }, []);
 
   const config: BoardLayoutConfig = {
-    rows: layout.rows ?? 4,
+    rows: layout.rows ?? MTR_LAYOUT.rowCount,
     columns: layout.columns ?? 1,
     showPlatform: layout.showPlatform ?? true,
     showCrowding: layout.showCrowding ?? true,

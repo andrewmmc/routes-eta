@@ -18,6 +18,7 @@ import type {
   AdapterCapabilities,
 } from "./base";
 import type { BoardState } from "../models";
+import { ARRIVAL_STATUS } from "../models/arrival";
 import { MTR_LINES, getMtrStationInfo } from "../data/mtr";
 
 // ── Zod schemas ────────────────────────────────────────────────────────────────
@@ -88,9 +89,9 @@ export function deriveStatus(
   timetype: "A" | "D" | undefined,
   isDelayed: boolean
 ): string | undefined {
-  if (timetype === "A") return "Arriving";
-  if (timetype === "D") return "Departing";
-  if (isDelayed) return "Delayed";
+  if (timetype === "A") return ARRIVAL_STATUS.ARRIVING;
+  if (timetype === "D") return ARRIVAL_STATUS.DEPARTING;
+  if (isDelayed) return ARRIVAL_STATUS.DELAYED;
   return undefined;
 }
 
@@ -101,6 +102,7 @@ export const MTR_CAPABILITIES: AdapterCapabilities = {
   hasCrowding: false,
   hasNextStation: false,
   hasTrainLength: false,
+  hasCustomUI: true, // MTR has its own branded board UI
 };
 
 export const mtrAdapter: TransportAdapter = {

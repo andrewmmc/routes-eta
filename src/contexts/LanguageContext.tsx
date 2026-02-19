@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
+import { DEFAULT_LANGUAGE } from "@/types/language";
+import type { Language } from "@/types/language";
 
-export type Language = "en" | "zh";
+export { type Language } from "@/types/language";
 
 interface LanguageContextType {
   language: Language;
@@ -12,7 +14,6 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 );
 
 const STORAGE_KEY = "preferred-language";
-const DEFAULT_LANGUAGE: Language = "zh";
 
 function getInitialLanguage(): Language {
   if (typeof window === "undefined") {
