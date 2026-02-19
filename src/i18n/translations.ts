@@ -17,6 +17,10 @@ export const translations = {
     viewBoard: { en: 'View Arrival Board', zh: '查看到站顯示' },
     up: { en: 'Up', zh: '上行' },
     down: { en: 'Down', zh: '下行' },
+    disclaimer: {
+      en: 'This application is provided "as is" for academic and educational purposes only. It is not affiliated with, endorsed by, or connected to any public transportation operator in Hong Kong, including but not limited to MTR Corporation Limited. All data is sourced from <link>data.gov.hk</link> and related third-party providers. No warranty is made regarding accuracy, completeness, or timeliness of information. This application should not be used for travel planning or any official purposes. The developer assumes no liability for any loss or damage arising from the use of this application.',
+      zh: '本應用程式僅供學術及教育用途，按「現狀」提供，不作任何保證。本應用程式與香港任何公共交通營運商（包括但不限於港鐵公司）無任何關聯、認可或聯繫。所有數據來自 <link>data.gov.hk</link> 及相關第三方數據提供者。不保證資訊的準確性、完整性或及時性。本應用程式不應用於行程規劃或任何官方用途。開發者不對因使用本應用程式而引致的任何損失或損害承擔責任。'
+    },
   },
   board: {
     platform: { en: 'Platform', zh: '月台' },
@@ -56,6 +60,7 @@ export type TranslationKey =
   | 'home.viewBoard'
   | 'home.up'
   | 'home.down'
+  | 'home.disclaimer'
   | 'board.platform'
   | 'board.destination'
   | 'board.arrival'

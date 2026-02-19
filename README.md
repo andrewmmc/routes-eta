@@ -111,6 +111,14 @@ npm run generate:mtr
 - **MTR**: Fully functional with real-time DATA.GOV.HK API integration
 - **KMB, Citybus, Ferry**: Planned for future release
 
+## Disclaimer
+
+This application is provided "as is" for academic and educational purposes only. It is not affiliated with, endorsed by, or connected to any public transportation operator in Hong Kong, including but not limited to MTR Corporation Limited.
+
+All data is sourced from [data.gov.hk](https://data.gov.hk) and related third-party providers. No warranty is made regarding accuracy, completeness, or timeliness of information.
+
+This application should not be used for travel planning or any official purposes. The developer assumes no liability for any loss or damage arising from the use of this application.
+
 ## License
 
 MIT

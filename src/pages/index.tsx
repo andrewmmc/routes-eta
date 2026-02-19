@@ -20,6 +20,40 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { getLocalizedName } from "@/utils/localization";
 import { LanguageSelector } from "@/components/LanguageSelector";
 
+/**
+ * Disclaimer component with link support
+ * Parses <link>...</link> placeholder and renders as anchor
+ */
+function Disclaimer() {
+  const { t } = useTranslation();
+  const text = t('home.disclaimer');
+
+  // Split by <link>...</link> tags
+  const parts = text.split(/<link>(.*?)<\/link>/);
+
+  return (
+    <>
+      {parts.map((part, index) => {
+        // Odd indices are the captured link content
+        if (index % 2 === 1) {
+          return (
+            <a
+              key={index}
+              href="https://data.gov.hk"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-gray-700"
+            >
+              {part}
+            </a>
+          );
+        }
+        return part;
+      })}
+    </>
+  );
+}
+
 const LINE_ORDER = [
   "AEL",
   "DRL",
@@ -190,6 +224,11 @@ export default function HomePage() {
             </p>
           )}
         </div>
+
+        {/* Disclaimer */}
+        <p className="mt-6 text-center text-xs text-gray-500">
+          <Disclaimer />
+        </p>
       </div>
     </div>
     </>
