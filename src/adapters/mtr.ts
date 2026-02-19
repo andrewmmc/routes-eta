@@ -60,14 +60,14 @@ const MTR_API_BASE = "https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php";
  * Parse an HKT datetime string ("YYYY-MM-DD HH:MM:SS") to a Date object.
  * HKT is UTC+8.
  */
-function parseHktTime(timeStr: string): Date {
+export function parseHktTime(timeStr: string): Date {
   return new Date(timeStr.replace(" ", "T") + "+08:00");
 }
 
 /**
  * Map the URL-friendly direction ("up" / "down") to the API key ("UP" / "DOWN").
  */
-function toApiDirection(directionId: string | undefined): "UP" | "DOWN" | null {
+export function toApiDirection(directionId: string | undefined): "UP" | "DOWN" | null {
   if (!directionId) return null;
   const upper = directionId.toUpperCase();
   if (upper === "UP" || upper === "DOWN") return upper;
@@ -78,7 +78,7 @@ function toApiDirection(directionId: string | undefined): "UP" | "DOWN" | null {
  * Derive arrival status from per-arrival timetype and global isdelay flag.
  * timetype takes precedence as it is per-arrival; isdelay is a global fallback.
  */
-function deriveStatus(
+export function deriveStatus(
   timetype: "A" | "D" | undefined,
   isDelayed: boolean
 ): string | undefined {
