@@ -13,7 +13,9 @@ export function useTranslation() {
       return key;
     }
 
-    const translation = namespace[keys[1] as keyof typeof namespace];
+    const translation = namespace[keys[1] as keyof typeof namespace] as
+      | { en: string; zh: string }
+      | undefined;
 
     if (!translation) {
       console.warn(`Translation key not found: ${key}`);

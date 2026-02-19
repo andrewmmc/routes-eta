@@ -33,7 +33,7 @@ export function ArrivalRow({
   // TODO: Add platform highlight
 
   const destinationName = getLocalizedName(
-    { name: arrival.destination, nameZh: arrival.destinationZh },
+    { name: arrival.destination ?? '', nameZh: arrival.destinationZh },
     language
   );
 

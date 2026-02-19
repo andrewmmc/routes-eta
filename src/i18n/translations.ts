@@ -30,6 +30,9 @@ export const translations = {
     noSchedule: { en: 'No schedule information', zh: '暫無班次資料' },
     lastUpdated: { en: 'Last updated', zh: '最後更新' },
   },
+  nav: {
+    backToHome: { en: 'Back to Home', zh: '返回主頁' },
+  },
   errors: {
     loadFailed: { en: 'Failed to Load', zh: '載入失敗' },
     noData: { en: 'Unable to load data, please try again later', zh: '無法載入資料，請稍後再試' },
@@ -63,6 +66,7 @@ export type TranslationKey =
   | 'board.minutes'
   | 'board.noSchedule'
   | 'board.lastUpdated'
+  | 'nav.backToHome'
   | 'errors.loadFailed'
   | 'errors.noData'
   | 'errors.invalidUrl';

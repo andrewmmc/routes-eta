@@ -16,6 +16,7 @@
 
 import { useRouter } from "next/router";
 import Head from "next/head";
+import Link from "next/link";
 import { BoardScreen, MTRBoard } from "../../components/board";
 import { useBoardData } from "../../hooks";
 import { LoadingBoard } from "../../components/ui/LoadingSpinner";
@@ -112,6 +113,14 @@ export default function BoardPage() {
         <title>{pageTitle}</title>
       </Head>
       <div className="min-h-screen bg-gray-100 p-4">
+        <div className="mx-auto mb-3 max-w-2xl">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800"
+          >
+            ← {t('nav.backToHome')}
+          </Link>
+        </div>
         <BoardScreen boardState={data} layout={config.layout} />
       </div>
     </>
