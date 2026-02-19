@@ -123,6 +123,10 @@ All data is sourced from [data.gov.hk](https://data.gov.hk) and related third-pa
 
 This application should not be used for travel planning or any official purposes. The developer assumes no liability for any loss or damage arising from the use of this application.
 
+## Acknowledgements
+
+Inspired by [chrisys/train-departure-display](https://github.com/chrisys/train-departure-display).
+
 ## License
 
 MIT
