@@ -26,42 +26,10 @@ export interface BoardConfig {
 /**
  * Pre-defined board configurations
  *
- * TODO: Add configurations for commonly used stations
- * TODO: Consider loading from external config/DB
+ * Note: All MTR lines are supported dynamically via getBoardConfigFromParams().
+ * This record can be used for custom overrides if needed.
  */
-export const BOARD_CONFIGS: Record<string, BoardConfig> = {
-  // MTR - Tsuen Wan Line to Central
-  "mtr-tsuen-wan-central": {
-    id: "mtr-tsuen-wan-central",
-    operatorId: "mtr",
-    stopId: "TSW",
-    serviceId: "TWL",
-    directionId: "down",
-    layout: {
-      rows: 4,
-      columns: 1,
-      showPlatform: true,
-      showCrowding: true,
-      showTrainLength: true,
-    },
-  },
-
-  // MTR - Island Line to Chai Wan
-  "mtr-island-chaiwan": {
-    id: "mtr-island-chaiwan",
-    operatorId: "mtr",
-    stopId: "ISL",
-    serviceId: "ISL",
-    directionId: "up",
-    layout: {
-      rows: 4,
-      columns: 1,
-      showPlatform: true,
-      showCrowding: true,
-      showTrainLength: true,
-    },
-  },
-};
+export const BOARD_CONFIGS: Record<string, BoardConfig> = {};
 
 /**
  * Get board config by ID
@@ -97,7 +65,7 @@ export function getBoardConfigFromParams(
   }
 
   // Return default config
-  // TODO: Get capabilities from adapter to determine layout
+  // All MTR lines are supported with this default layout
   return {
     id: `${operatorId}-${serviceId}-${stopId}`,
     operatorId: operatorId as OperatorId,
@@ -108,8 +76,8 @@ export function getBoardConfigFromParams(
       rows: 4,
       columns: 1,
       showPlatform: true,
-      showCrowding: true,
-      showTrainLength: true,
+      showCrowding: false,
+      showTrainLength: false,
     },
   };
 }
