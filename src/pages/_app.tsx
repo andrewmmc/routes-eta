@@ -35,7 +35,11 @@ function AppContent({ Component, pageProps }: AppProps) {
   }, [language]);
 
   return (
-    <NextIntlClientProvider locale={language} messages={messages}>
+    <NextIntlClientProvider
+      locale={language}
+      messages={messages}
+      timeZone="Asia/Hong_Kong"
+    >
       <Component {...pageProps} />
     </NextIntlClientProvider>
   );
