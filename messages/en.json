@@ -1,0 +1,42 @@
+{
+  "common": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "retry": "Retry"
+  },
+  "home": {
+    "title": "Routes ETA",
+    "subtitle": "Hong Kong Transport Arrival Board Display",
+    "selectBoard": "Select Board",
+    "line": "Line",
+    "direction": "Direction",
+    "station": "Station",
+    "selectLine": "Select a line...",
+    "selectDirection": "Select a direction...",
+    "selectStation": "Select a station...",
+    "viewBoard": "View Arrival Board",
+    "up": "Up",
+    "down": "Down",
+    "disclaimer": "This application is provided \"as is\" for academic and educational purposes only. It is not affiliated with, endorsed by, or connected to any public transportation operator in Hong Kong, including but not limited to MTR Corporation Limited. All data is sourced from <link>data.gov.hk</link> and related third-party providers. No warranty is made regarding accuracy, completeness, or timeliness of information. This application should not be used for travel planning or any official purposes. The developer assumes no liability for any loss or damage arising from the use of this application."
+  },
+  "board": {
+    "platform": "Platform",
+    "destination": "Destination",
+    "arrival": "Arrival",
+    "trainLength": "Cars",
+    "crowding": "Crowding",
+    "cars": "cars",
+    "arriving": "Arriving",
+    "minutes": "min",
+    "noSchedule": "No schedule information",
+    "lastUpdated": "Last updated"
+  },
+  "nav": {
+    "backToHome": "Back to Home"
+  },
+  "errors": {
+    "loadFailed": "Failed to Load",
+    "noData": "Unable to load data, please try again later",
+    "invalidUrl": "Invalid URL parameters"
+  }
+}

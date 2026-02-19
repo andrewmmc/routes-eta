@@ -20,35 +20,22 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { getLocalizedName } from "@/utils/localization";
 import { LanguageSelector } from "@/components/LanguageSelector";
 
-/**
- * Disclaimer component with link support
- * Parses <link>...</link> placeholder and renders as anchor
- */
 function Disclaimer() {
   const { t } = useTranslation();
-  const text = t('home.disclaimer');
-
-  // Split by <link>...</link> tags
-  const parts = text.split(/<link>(.*?)<\/link>/);
 
   return (
     <>
-      {parts.map((part, index) => {
-        // Odd indices are the captured link content
-        if (index % 2 === 1) {
-          return (
-            <a
-              key={index}
-              href="https://data.gov.hk"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-gray-700"
-            >
-              {part}
-            </a>
-          );
-        }
-        return part;
+      {t.rich("home.disclaimer", {
+        link: (chunks) => (
+          <a
+            href="https://data.gov.hk"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-gray-700"
+          >
+            {chunks}
+          </a>
+        ),
       })}
     </>
   );
@@ -121,116 +108,126 @@ export default function HomePage() {
   return (
     <>
       <Head>
-        <title>{t('home.title')}</title>
+        <title>{t("home.title")}</title>
       </Head>
       <div className="min-h-screen bg-gray-100 p-4">
-      <div className="mx-auto max-w-2xl">
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex-1" />
-          <h1 className="flex-1 text-center text-3xl font-bold">{t('home.title')}</h1>
-          <div className="flex flex-1 justify-end">
-            <LanguageSelector />
+        <div className="mx-auto max-w-2xl">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex-1" />
+            <h1 className="flex-1 text-center text-3xl font-bold">
+              {t("home.title")}
+            </h1>
+            <div className="flex flex-1 justify-end">
+              <LanguageSelector />
+            </div>
           </div>
-        </div>
-        <p className="mb-8 text-center text-gray-600">
-          {t('home.subtitle')}
-        </p>
+          <p className="mb-8 text-center text-gray-600">{t("home.subtitle")}</p>
 
-        {/* Board Selector */}
-        <div className="rounded-lg bg-white p-6 shadow">
-          <h2 className="mb-5 text-xl font-semibold">{t('home.selectBoard')}</h2>
+          {/* Board Selector */}
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h2 className="mb-5 text-xl font-semibold">
+              {t("home.selectBoard")}
+            </h2>
 
-          {/* Line selector */}
-          <div className="mb-4">
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              {t('home.line')}
-            </label>
-            <select
-              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-              value={selectedLine}
-              onChange={(e) => handleLineChange(e.target.value)}
-            >
-              <option value="">{t('home.selectLine')}</option>
-              {LINE_ORDER.map((code) => {
-                const line = MTR_LINES[code];
-                if (!line) return null;
-                return (
-                  <option key={code} value={code}>
-                    {getLocalizedName({ name: line.nameEn, nameZh: line.nameZh }, language)}
+            {/* Line selector */}
+            <div className="mb-4">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                {t("home.line")}
+              </label>
+              <select
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                value={selectedLine}
+                onChange={(e) => handleLineChange(e.target.value)}
+              >
+                <option value="">{t("home.selectLine")}</option>
+                {LINE_ORDER.map((code) => {
+                  const line = MTR_LINES[code];
+                  if (!line) return null;
+                  return (
+                    <option key={code} value={code}>
+                      {getLocalizedName(
+                        { name: line.nameEn, nameZh: line.nameZh },
+                        language
+                      )}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+
+            {/* Direction selector */}
+            <div className="mb-4">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                {t("home.direction")}
+              </label>
+              <select
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
+                value={selectedDirection}
+                onChange={(e) => handleDirectionChange(e.target.value)}
+                disabled={!selectedLine}
+              >
+                <option value="">{t("home.selectDirection")}</option>
+                {directions.map((d) => (
+                  <option key={d.urlDirection} value={d.urlDirection}>
+                    {language === "zh"
+                      ? getDirectionLabelZh(d)
+                      : getDirectionLabel(d)}
                   </option>
-                );
-              })}
-            </select>
-          </div>
+                ))}
+              </select>
+            </div>
 
-          {/* Direction selector */}
-          <div className="mb-4">
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              {t('home.direction')}
-            </label>
-            <select
-              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
-              value={selectedDirection}
-              onChange={(e) => handleDirectionChange(e.target.value)}
-              disabled={!selectedLine}
+            {/* Station selector */}
+            <div className="mb-6">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                {t("home.station")}
+              </label>
+              <select
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
+                value={selectedStation}
+                onChange={(e) => setSelectedStation(e.target.value)}
+                disabled={!selectedDirection}
+              >
+                <option value="">{t("home.selectStation")}</option>
+                {stations.map((s) => (
+                  <option key={s.code} value={s.code}>
+                    {getLocalizedName(
+                      { name: s.nameEn, nameZh: s.nameZh },
+                      language
+                    )}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Go button */}
+            <button
+              onClick={handleGo}
+              disabled={!canNavigate}
+              style={
+                canNavigate && selectedLineInfo
+                  ? { backgroundColor: selectedLineInfo.color }
+                  : undefined
+              }
+              className="w-full rounded-md px-4 py-2 text-sm font-medium text-white transition hover:brightness-90 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
             >
-              <option value="">{t('home.selectDirection')}</option>
-              {directions.map((d) => (
-                <option key={d.urlDirection} value={d.urlDirection}>
-                  {language === 'zh' ? getDirectionLabelZh(d) : getDirectionLabel(d)}
-                </option>
-              ))}
-            </select>
+              {t("home.viewBoard")}
+            </button>
+
+            {boardUrl && (
+              <p className="mt-3 text-xs text-gray-400">
+                URL:{" "}
+                <code className="rounded bg-gray-100 px-1">{boardUrl}</code>
+              </p>
+            )}
           </div>
 
-          {/* Station selector */}
-          <div className="mb-6">
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              {t('home.station')}
-            </label>
-            <select
-              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
-              value={selectedStation}
-              onChange={(e) => setSelectedStation(e.target.value)}
-              disabled={!selectedDirection}
-            >
-              <option value="">{t('home.selectStation')}</option>
-              {stations.map((s) => (
-                <option key={s.code} value={s.code}>
-                  {getLocalizedName({ name: s.nameEn, nameZh: s.nameZh }, language)}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Go button */}
-          <button
-            onClick={handleGo}
-            disabled={!canNavigate}
-            style={
-              canNavigate && selectedLineInfo
-                ? { backgroundColor: selectedLineInfo.color }
-                : undefined
-            }
-            className="w-full rounded-md px-4 py-2 text-sm font-medium text-white transition hover:brightness-90 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
-          >
-            {t('home.viewBoard')}
-          </button>
-
-          {boardUrl && (
-            <p className="mt-3 text-xs text-gray-400">
-              URL:{" "}
-              <code className="rounded bg-gray-100 px-1">{boardUrl}</code>
-            </p>
-          )}
+          {/* Disclaimer */}
+          <p className="mt-6 text-center text-xs text-gray-500">
+            <Disclaimer />
+          </p>
         </div>
-
-        {/* Disclaimer */}
-        <p className="mt-6 text-center text-xs text-gray-500">
-          <Disclaimer />
-        </p>
       </div>
-    </div>
     </>
   );
 }

@@ -7,19 +7,35 @@
 
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import { LanguageProvider, useLanguageContext } from "@/contexts/LanguageContext";
-import { useEffect } from "react";
+import { NextIntlClientProvider } from "next-intl";
+import {
+  LanguageProvider,
+  useLanguageContext,
+} from "@/contexts/LanguageContext";
+import { useEffect, useState } from "react";
 
 function AppContent({ Component, pageProps }: AppProps) {
   const { language } = useLanguageContext();
+  const [messages, setMessages] = useState(pageProps.messages);
 
   // Update HTML lang attribute when language changes
   useEffect(() => {
-    const htmlLang = language === 'zh' ? 'zh-HK' : 'en';
+    const htmlLang = language === "zh" ? "zh-HK" : "en";
     document.documentElement.lang = htmlLang;
   }, [language]);
 
-  return <Component {...pageProps} />;
+  // Load messages for the active language
+  useEffect(() => {
+    import(`../../messages/${language}.json`).then((mod) => {
+      setMessages(mod.default);
+    });
+  }, [language]);
+
+  return (
+    <NextIntlClientProvider locale={language} messages={messages}>
+      <Component {...pageProps} />
+    </NextIntlClientProvider>
+  );
 }
 
 export default function App(props: AppProps) {

@@ -1,0 +1,42 @@
+{
+  "common": {
+    "submit": "提交",
+    "cancel": "取消",
+    "retry": "重試"
+  },
+  "home": {
+    "title": "Routes ETA",
+    "subtitle": "香港交通到站顯示",
+    "selectBoard": "選擇顯示板",
+    "line": "路線",
+    "direction": "方向",
+    "station": "車站",
+    "selectLine": "選擇路線...",
+    "selectDirection": "選擇方向...",
+    "selectStation": "選擇車站...",
+    "viewBoard": "查看到站顯示",
+    "up": "上行",
+    "down": "下行",
+    "disclaimer": "本應用程式僅供學術及教育用途，按「現狀」提供，不作任何保證。本應用程式與香港任何公共交通營運商（包括但不限於港鐵公司）無任何關聯、認可或聯繫。所有數據來自 <link>data.gov.hk</link> 及相關第三方數據提供者。不保證資訊的準確性、完整性或及時性。本應用程式不應用於行程規劃或任何官方用途。開發者不對因使用本應用程式而引致的任何損失或損害承擔責任。"
+  },
+  "board": {
+    "platform": "月台",
+    "destination": "目的地",
+    "arrival": "到達",
+    "trainLength": "車卡",
+    "crowding": "擠迫",
+    "cars": "卡",
+    "arriving": "即將抵達",
+    "minutes": "分鐘",
+    "noSchedule": "暫無班次資料",
+    "lastUpdated": "最後更新"
+  },
+  "nav": {
+    "backToHome": "返回主頁"
+  },
+  "errors": {
+    "loadFailed": "載入失敗",
+    "noData": "無法載入資料，請稍後再試",
+    "invalidUrl": "無效的網址參數"
+  }
+}

@@ -1,33 +1,21 @@
-import { useLanguageContext, Language } from '@/contexts/LanguageContext';
-import { translations, TranslationKey } from '@/i18n/translations';
+/**
+ * Thin wrapper that combines next-intl's useTranslations with the app's
+ * language switcher context. Keeps the same call-site API as before:
+ *
+ *   const { t, language, setLanguage } = useTranslation();
+ *
+ * For rich text (inline React elements), use next-intl's t.rich() directly:
+ *
+ *   t.rich('home.disclaimer', {
+ *     link: (chunks) => <a href="...">{chunks}</a>,
+ *   })
+ */
+import { useTranslations } from "next-intl";
+import { useLanguageContext } from "@/contexts/LanguageContext";
 
 export function useTranslation() {
+  const t = useTranslations();
   const { language, setLanguage } = useLanguageContext();
 
-  const t = (key: TranslationKey): string => {
-    const keys = key.split('.') as [keyof typeof translations, string];
-    const namespace = translations[keys[0]];
-
-    if (!namespace) {
-      console.warn(`Translation namespace not found: ${keys[0]}`);
-      return key;
-    }
-
-    const translation = namespace[keys[1] as keyof typeof namespace] as
-      | { en: string; zh: string }
-      | undefined;
-
-    if (!translation) {
-      console.warn(`Translation key not found: ${key}`);
-      return key;
-    }
-
-    return translation[language] || translation.en;
-  };
-
-  return {
-    t,
-    language,
-    setLanguage,
-  };
+  return { t, language, setLanguage };
 }
