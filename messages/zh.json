@@ -5,7 +5,7 @@
     "retry": "重試"
   },
   "home": {
-    "title": "Routes ETA",
+    "title": "香港交通到站模擬器",
     "subtitle": "香港交通到站顯示",
     "selectBoard": "選擇顯示板",
     "line": "路線",

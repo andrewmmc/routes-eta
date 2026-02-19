@@ -1,6 +1,10 @@
-# Routes ETA
+# Hong Kong Transport ETA Simulator
 
 Hong Kong transport arrival display UI (MTR station screen style) with an extensible architecture that supports multiple transport operators through an adapter pattern.
+
+**Live Demo**: [https://eta.mmc.dev](https://eta.mmc.dev)
+
+![Demo](assets/demo.png)
 
 ## Tech Stack
 
@@ -10,7 +14,7 @@ Hong Kong transport arrival display UI (MTR station screen style) with an extens
 - **Schema Validation**: Zod
 - **Data Source**: DATA.GOV.HK APIs
 
-## Getting Started
+## Development
 
 ```bash
 npm install
