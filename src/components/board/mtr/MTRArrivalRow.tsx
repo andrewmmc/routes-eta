@@ -108,10 +108,12 @@ export function MTRArrivalRow({
         {/* Column 1: Platform circle */}
         <div className="flex w-12 items-center justify-center md:w-20 lg:w-28">
           <div
-            className="flex h-8 w-8 items-center justify-center rounded-full text-lg font-mtr-english text-white md:h-14 md:w-14 md:text-2xl lg:h-20 lg:w-20 lg:text-4xl"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-3xl font-mtr-english text-white md:h-14 md:w-14 md:text-4xl lg:h-20 lg:w-20 lg:text-6xl"
             style={{ backgroundColor: lineColor }}
           >
-            {arrival.platform}
+            <span style={{ marginTop: "4px", lineHeight: 1 }}>
+              {arrival.platform}
+            </span>
           </div>
         </div>
 
