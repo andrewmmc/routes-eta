@@ -13,10 +13,13 @@ import {
   useLanguageContext,
 } from "@/contexts/LanguageContext";
 import { useEffect, useState } from "react";
+import defaultMessages from "../../messages/zh.json";
 
 function AppContent({ Component, pageProps }: AppProps) {
   const { language } = useLanguageContext();
-  const [messages, setMessages] = useState(pageProps.messages);
+  const [messages, setMessages] = useState(
+    pageProps.messages ?? defaultMessages
+  );
 
   // Update HTML lang attribute when language changes
   useEffect(() => {
