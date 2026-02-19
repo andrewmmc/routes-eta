@@ -6,6 +6,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/router";
+import Head from "next/head";
 import {
   MTR_LINES,
   MTR_LINE_DIRECTIONS,
@@ -84,7 +85,11 @@ export default function HomePage() {
   const selectedLineInfo = selectedLine ? MTR_LINES[selectedLine] : null;
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
+    <>
+      <Head>
+        <title>{t('home.title')}</title>
+      </Head>
+      <div className="min-h-screen bg-gray-100 p-4">
       <div className="mx-auto max-w-2xl">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex-1" />
@@ -187,5 +192,6 @@ export default function HomePage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
