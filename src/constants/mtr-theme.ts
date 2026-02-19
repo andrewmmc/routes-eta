@@ -26,8 +26,8 @@ export const MTR_COLORS = {
 export const MTR_LAYOUT = {
   /** Header flex ratio */
   headerFlex: "flex-[0.75]" as const,
-  /** Horizontal padding for rows and header */
-  paddingX: "px-16" as const,
+  /** Horizontal padding for rows and header (mobile: px-4, desktop: px-16) */
+  paddingX: "px-4 md:px-12 lg:px-16" as const,
   /** Default number of arrival rows to display */
   rowCount: 4,
 } as const;

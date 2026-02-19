@@ -5,6 +5,7 @@
  * Layout: [Destination] --- [Line Circle] --- [Platform Circle + ETA]
  */
 
+import { useRef, useState, useEffect, useCallback } from "react";
 import type { Arrival } from "../../../models";
 import type { Language } from "@/types/language";
 import { getMtrLabels } from "@/constants/mtr-labels";
@@ -29,6 +30,10 @@ export function MTRArrivalRow({
   language,
 }: MTRArrivalRowProps) {
   const bgColor = getRowBgClass(index);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const zhTextRef = useRef<HTMLSpanElement>(null);
+  const enTextRef = useRef<HTMLSpanElement>(null);
+  const [marqueeNeeded, setMarqueeNeeded] = useState({ zh: false, en: false });
 
   // Determine if arriving soon (within 1 minute)
   const isArrivingSoon = isArriving(arrival.eta);
@@ -37,29 +42,73 @@ export function MTRArrivalRow({
   const labels = getMtrLabels(language);
 
   // Get destination based on language
-  const destination =
-    language === "zh"
-      ? arrival.destinationZh || arrival.destination
-      : arrival.destination;
+  const destinationZh = arrival.destinationZh || arrival.destination;
+  const destinationEn = arrival.destination;
+  const destination = language === "zh" ? destinationZh : destinationEn;
 
   // Font class based on language
   const textFontClass = getLanguageFontClass(language);
 
+  // Check overflow for both languages
+  const checkOverflow = useCallback(() => {
+    if (containerRef.current) {
+      const containerWidth = containerRef.current.clientWidth;
+      const zhWidth = zhTextRef.current?.scrollWidth ?? 0;
+      const enWidth = enTextRef.current?.scrollWidth ?? 0;
+      setMarqueeNeeded({
+        zh: zhWidth > containerWidth,
+        en: enWidth > containerWidth,
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    checkOverflow();
+    window.addEventListener("resize", checkOverflow);
+    return () => window.removeEventListener("resize", checkOverflow);
+  }, [checkOverflow, destinationZh, destinationEn]);
+
+  const shouldMarquee = language === "zh" ? marqueeNeeded.zh : marqueeNeeded.en;
+
   return (
     <div
-      className={`flex flex-1 items-center justify-between px-16 ${bgColor}`}
+      className={`flex flex-1 items-center justify-between px-4 md:px-12 lg:px-16 ${bgColor}`}
     >
-      {/* Left: Destination */}
-      <span className={`text-7xl text-black ${textFontClass}`}>
-        {destination}
+      {/* Hidden elements to measure text width for both languages */}
+      <span
+        ref={zhTextRef}
+        className="invisible absolute whitespace-nowrap text-2xl font-mtr-chinese md:text-5xl lg:text-7xl"
+        aria-hidden="true"
+      >
+        {destinationZh}
+      </span>
+      <span
+        ref={enTextRef}
+        className="invisible absolute whitespace-nowrap text-2xl font-mtr-english md:text-5xl lg:text-7xl"
+        aria-hidden="true"
+      >
+        {destinationEn}
       </span>
 
+      {/* Left: Destination */}
+      <div
+        ref={containerRef}
+        className={`min-w-0 flex-1 whitespace-nowrap ${shouldMarquee ? "mtr-marquee-container" : ""}`}
+      >
+        <span
+          className={`inline-block whitespace-nowrap text-2xl text-black md:text-5xl lg:text-7xl ${textFontClass} ${shouldMarquee ? "mtr-marquee-content" : ""}`}
+          style={shouldMarquee ? { paddingRight: "2rem" } : undefined}
+        >
+          {shouldMarquee ? `${destination}　　　　${destination}` : destination}
+        </span>
+      </div>
+
       {/* Right: Platform circle + ETA in separate columns */}
-      <div className="flex items-center">
+      <div className="flex shrink-0 items-center">
         {/* Column 1: Platform circle */}
-        <div className="flex w-28 items-center justify-center">
+        <div className="flex w-12 items-center justify-center md:w-20 lg:w-28">
           <div
-            className="flex h-20 w-20 items-center justify-center rounded-full text-4xl font-mtr-english text-white"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-lg font-mtr-english text-white md:h-14 md:w-14 md:text-2xl lg:h-20 lg:w-20 lg:text-4xl"
             style={{ backgroundColor: lineColor }}
           >
             {arrival.platform}
@@ -67,17 +116,21 @@ export function MTRArrivalRow({
         </div>
 
         {/* Column 2: ETA */}
-        <div className="flex min-w-[320px] items-center justify-end gap-4">
+        <div className="flex min-w-[100px] items-center justify-end gap-1 md:min-w-[240px] md:gap-3 lg:min-w-[320px] lg:gap-4">
           {arrival.isArrived ? null : isArrivingSoon ? ( // Train has arrived - leave column empty
-            <span className={`text-6xl text-black ${textFontClass}`}>
+            <span
+              className={`text-xl text-black md:text-4xl lg:text-6xl ${textFontClass}`}
+            >
               {labels.arriving}
             </span>
           ) : (
             <>
-              <span className="text-7xl font-mtr-english text-black">
+              <span className="text-2xl font-mtr-english text-black md:text-5xl lg:text-7xl">
                 {formatETAMinutes(arrival.eta)}
               </span>
-              <span className={`text-5xl text-black ${textFontClass}`}>
+              <span
+                className={`text-lg text-black md:text-3xl lg:text-5xl ${textFontClass}`}
+              >
                 {labels.minutes}
               </span>
             </>

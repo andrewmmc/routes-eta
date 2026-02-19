@@ -155,11 +155,19 @@ export const mtrAdapter: TransportAdapter = {
       const destStation = getMtrStationInfo(params.serviceId, a.dest);
       const isViaRacecourse = a.route === "RAC";
 
-      const destination =
-        (destStation?.nameEn ?? a.dest) +
-        (isViaRacecourse ? " via Racecourse" : "");
-      const destinationZh =
-        (destStation?.nameZh ?? a.dest) + (isViaRacecourse ? " 經馬場" : "");
+      // Special case: AEL UP direction at HOK, KOW, TSY shows "Airport & AsiaWorld-Expo"
+      const isAelUpFromCity =
+        params.serviceId === "AEL" &&
+        params.directionId === "up" &&
+        ["HOK", "KOW", "TSY"].includes(params.stopId);
+
+      const destination = isAelUpFromCity
+        ? "Airport & AsiaWorld-Expo"
+        : (destStation?.nameEn ?? a.dest) +
+          (isViaRacecourse ? " via Racecourse" : "");
+      const destinationZh = isAelUpFromCity
+        ? "機場及博覽館"
+        : (destStation?.nameZh ?? a.dest) + (isViaRacecourse ? " 經馬場" : "");
 
       // Check if train has arrived: curr_time equals arrival time
       const isArrived = stationData?.curr_time === a.time;

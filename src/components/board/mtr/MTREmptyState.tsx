@@ -33,7 +33,9 @@ export function MTREmptyState({
           className={`flex flex-1 items-center justify-center ${getRowBgClass(startIndex + index)}`}
         >
           {showMessage && index === 0 && (
-            <span className={`text-4xl text-gray-400 ${textFontClass}`}>
+            <span
+              className={`text-xl text-gray-400 md:text-3xl lg:text-4xl ${textFontClass}`}
+            >
               {labels.noSchedule}
             </span>
           )}

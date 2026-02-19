@@ -37,3 +37,24 @@ body {
   font-family: var(--font-mtr-english);
   font-weight: 600;
 }
+
+/* MTR Marquee animation for long destination text */
+@keyframes mtr-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.mtr-marquee-container {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.mtr-marquee-content {
+  display: inline-block;
+  white-space: nowrap;
+  animation: mtr-marquee 8s linear infinite;
+}
