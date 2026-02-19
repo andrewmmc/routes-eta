@@ -134,7 +134,7 @@ interface TransportAdapter {
 
 interface AdapterCapabilities {
   hasPlatform: boolean; // MTR: yes, Bus: no
-  hasCrowding: boolean; // MTR: yes
+  hasCrowding: boolean; // MTR: no
   hasNextStation: boolean; // Ferry: no
 }
 ```
@@ -270,3 +270,133 @@ src/
 | KMB      | Bus ETA API                |
 | Citybus  | Bus ETA API                |
 | Ferry    | Ferry schedule API         |
+
+---
+
+## Unit Test Plan
+
+UI component tests are out of scope. Focus is on logic and utility functions only.
+
+### Test Infrastructure
+
+- **Test runner:** Vitest (already installed, `npm run test`)
+- **No additional setup needed** — no jsdom, no `@testing-library`
+- Test files co-located with source: `src/**/*.test.ts`
+
+### Files to Test
+
+#### 1. `src/lib/api.ts` — `formatETA()` & `formatCountdown()`
+
+Pure time-diff formatters. Clear branching logic, zero dependencies.
+
+| Case                     | `formatETA` expected |
+| ------------------------ | -------------------- |
+| `null`                   | `"--"`               |
+| ETA in the past / ≤0 min | `"Arr"`              |
+| ETA in exactly 1 min     | `"1 min"`            |
+| ETA in N mins            | `"N mins"`           |
+
+Same matrix for `formatCountdown()` (returns `"MM:SS"`).
+
+---
+
+#### 2. `src/adapters/mtr.ts` — Helper Functions
+
+Three private helpers and the main transform. Will need to export them or test via `mapToBoardState()`.
+
+| Function            | Cases                                                                                                                              |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `parseHktTime()`    | Valid HKT string → Date; invalid string → null                                                                                     |
+| `toApiDirection()`  | `"up"` / `"down"` → correct API string; unknown → fallback                                                                         |
+| `deriveStatus()`    | All possible API status codes → `ArrivalStatus` enum values                                                                        |
+| `mapToBoardState()` | Valid raw API fixture → correct `BoardState` shape; empty arrivals array; platform/crowding fields present when capability enabled |
+
+---
+
+#### 3. `src/adapters/index.ts` — Adapter Registry
+
+| Function                         | Cases                            |
+| -------------------------------- | -------------------------------- |
+| `getAdapter("mtr")`              | Returns the MTR adapter instance |
+| `getAdapter("unknown")`          | Returns `undefined` or throws    |
+| `isOperatorSupported("mtr")`     | `true`                           |
+| `isOperatorSupported("unknown")` | `false`                          |
+| `getSupportedOperators()`        | Array contains `"mtr"`           |
+
+---
+
+#### 4. `src/utils/localization.ts`
+
+| Function                                            | Cases                          |
+| --------------------------------------------------- | ------------------------------ |
+| `getLocalizedName(obj, "en")`                       | Returns `name` field           |
+| `getLocalizedName(obj, "zh")`                       | Returns `nameZh` field         |
+| `getLocalizedName(obj, "zh")` when `nameZh` missing | Falls back to `name`           |
+| `formatLocalizedTime(date, "en")`                   | Returns en-US formatted string |
+| `formatLocalizedTime(date, "zh")`                   | Returns zh-HK formatted string |
+
+---
+
+#### 5. `src/config/board-configs.ts` — `getBoardConfigFromParams()`
+
+| Case                                                            |
+| --------------------------------------------------------------- |
+| Known operator/service/stop/direction → returns matching config |
+| Unknown combination → returns a default layout config           |
+| `getBoardConfig(id)` with valid id → found                      |
+| `getBoardConfig(id)` with invalid id → `undefined`              |
+
+---
+
+#### 6. `src/hooks/useBoardData.ts` — `filterByMaxEta()`
+
+Pure array filter (60-min window). No React context needed if extracted and exported.
+
+| Case                                                                  |
+| --------------------------------------------------------------------- |
+| Empty array → `[]`                                                    |
+| All arrivals within 60 min → all returned                             |
+| Arrivals beyond 60 min → filtered out                                 |
+| Arrivals with `null` ETA → filtered out (or kept, depending on logic) |
+
+---
+
+#### 7. `src/data/mtr.ts` — Data Helpers _(partially covered)_
+
+Extend existing `scripts/generate-mtr-data.test.ts` or add `src/data/mtr.test.ts`:
+
+| Function                                    | Cases                                        |
+| ------------------------------------------- | -------------------------------------------- |
+| `getMtrLineDirections("EAL")`               | Returns both directions including LMC branch |
+| `getMtrStationInfo("TWL", "CEN")`           | Returns correct station name EN + ZH         |
+| `getMtrStationInfo("TWL", "NONEXISTENT")`   | Returns `undefined`                          |
+| `getDirectionLabel` / `getDirectionLabelZh` | Already covered — verify completeness        |
+
+---
+
+### Suggested File Layout
+
+```
+src/
+  lib/
+    api.test.ts              # formatETA, formatCountdown
+  adapters/
+    mtr.test.ts              # parseHktTime, toApiDirection, deriveStatus, mapToBoardState
+    index.test.ts            # getAdapter, isOperatorSupported, getSupportedOperators
+  utils/
+    localization.test.ts     # getLocalizedName, formatLocalizedTime
+  config/
+    board-configs.test.ts    # getBoardConfig, getBoardConfigFromParams
+  hooks/
+    useBoardData.test.ts     # filterByMaxEta (pure helper only)
+  data/
+    mtr.test.ts              # getMtrStationInfo, getMtrLineDirections
+```
+
+### Implementation Notes
+
+1. **Export private helpers** — `parseHktTime`, `toApiDirection`, `deriveStatus` in `mtr.ts` and `filterByMaxEta` in `useBoardData.ts` are currently unexported. Either export them (preferred) or test indirectly through `mapToBoardState` / hook output.
+2. **No mocking needed** for most tests — all target functions are pure or use static data.
+3. **`mapToBoardState()` tests** will need fixture JSON matching the MTR API Zod schema shape.
+4. **`formatLocalizedTime()`** uses `Date` — pass a fixed `new Date("2026-01-01T12:00:00+08:00")` to avoid flakiness.
+5. **`apiFetch()`** in `api.ts` wraps `fetch` — skip or mock with `vi.stubGlobal("fetch", ...)` if testing it; `formatETA`/`formatCountdown` are independently testable without touching fetch.
