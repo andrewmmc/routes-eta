@@ -2,10 +2,8 @@
  * Board Components - Re-export all board components
  */
 
-export * from "./BoardScreen";
-export * from "./BoardHeader";
-export * from "./BoardFooter";
-export * from "./ArrivalRow";
+// Default/Generic board components for non-MTR operators
+export * from "./default";
 
-// MTR-specific skin
+// MTR-specific styled components
 export * from "./mtr";

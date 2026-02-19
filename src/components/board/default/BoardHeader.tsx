@@ -9,7 +9,7 @@
  * TODO: Add operator logo
  */
 
-import type { BoardState } from "../../models";
+import type { BoardState } from "../../../models";
 import { useTranslation } from "@/hooks/useTranslation";
 import { getLocalizedName } from "@/utils/localization";
 

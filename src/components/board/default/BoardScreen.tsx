@@ -9,8 +9,8 @@
  * TODO: Add full-screen mode support
  */
 
-import type { BoardState } from "../../models";
-import type { BoardLayoutConfig } from "../../config";
+import type { BoardState } from "../../../models";
+import type { BoardLayoutConfig } from "../../../config";
 import { BoardHeader } from "./BoardHeader";
 import { BoardFooter } from "./BoardFooter";
 import { ArrivalRow } from "./ArrivalRow";

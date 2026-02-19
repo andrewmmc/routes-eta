@@ -8,7 +8,7 @@
  * TODO: Add crowding indicator visuals
  */
 
-import type { Arrival } from "../../models";
+import type { Arrival } from "../../../models";
 import { useTranslation } from "@/hooks/useTranslation";
 import { getLocalizedName } from "@/utils/localization";
 

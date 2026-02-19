@@ -7,7 +7,7 @@
  * TODO: Add auto-refresh indicator
  */
 
-import type { BoardState } from "../../models";
+import type { BoardState } from "../../../models";
 import { useTranslation } from "@/hooks/useTranslation";
 import { formatLocalizedTime } from "@/utils/localization";
 
