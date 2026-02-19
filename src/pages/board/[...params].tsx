@@ -59,9 +59,7 @@ export default function BoardPage() {
   }
 
   if (!operatorId || !serviceId || !stopId) {
-    return (
-      <ErrorDisplay message={t('errors.invalidUrl')} />
-    );
+    return <ErrorDisplay message={t("errors.invalidUrl")} />;
   }
 
   // Loading state
@@ -92,7 +90,7 @@ export default function BoardPage() {
 
   const stationName = getLocalizedName(data.station, language);
   const serviceName = getLocalizedName(data.service, language);
-  const updateLabel = t('board.lastUpdated');
+  const updateLabel = t("board.lastUpdated");
 
   const pageTitle = `${stationName} | ${serviceName} | ${updateLabel}: ${lastUpdatedStr}`;
 
@@ -118,7 +116,7 @@ export default function BoardPage() {
             href="/"
             className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800"
           >
-            ← {t('nav.backToHome')}
+            ← {t("nav.backToHome")}
           </Link>
         </div>
         <BoardScreen boardState={data} layout={config.layout} />

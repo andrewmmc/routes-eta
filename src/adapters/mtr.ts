@@ -12,7 +12,11 @@
  */
 
 import { z } from "zod";
-import type { TransportAdapter, FetchParams, AdapterCapabilities } from "./base";
+import type {
+  TransportAdapter,
+  FetchParams,
+  AdapterCapabilities,
+} from "./base";
 import type { BoardState } from "../models";
 import { MTR_LINES, getMtrStationInfo } from "../data/mtr";
 
@@ -31,7 +35,7 @@ const MtrArrivalSchema = z.object({
   source: z.string().optional(),
   // EAL-only optional fields
   timetype: z.enum(["A", "D"]).optional(), // A = Arrival, D = Departure
-  route: z.string().optional(),            // "" = Normal, "RAC" = Via Racecourse
+  route: z.string().optional(), // "" = Normal, "RAC" = Via Racecourse
 });
 
 const MtrLineStationDataSchema = z.object({
@@ -67,7 +71,9 @@ export function parseHktTime(timeStr: string): Date {
 /**
  * Map the URL-friendly direction ("up" / "down") to the API key ("UP" / "DOWN").
  */
-export function toApiDirection(directionId: string | undefined): "UP" | "DOWN" | null {
+export function toApiDirection(
+  directionId: string | undefined
+): "UP" | "DOWN" | null {
   if (!directionId) return null;
   const upper = directionId.toUpperCase();
   if (upper === "UP" || upper === "DOWN") return upper;

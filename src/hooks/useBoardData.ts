@@ -14,7 +14,7 @@ export const MAX_ETA_MS = 60 * 60000; // 60 minutes
 export function filterByMaxEta(arrivals: Arrival[]): Arrival[] {
   const now = Date.now();
   return arrivals.filter(
-    (arrival) => !arrival.eta || arrival.eta.getTime() - now <= MAX_ETA_MS,
+    (arrival) => !arrival.eta || arrival.eta.getTime() - now <= MAX_ETA_MS
   );
 }
 

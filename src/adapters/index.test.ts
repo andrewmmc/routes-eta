@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { getAdapter, isOperatorSupported, getSupportedOperators } from "./index";
+import {
+  getAdapter,
+  isOperatorSupported,
+  getSupportedOperators,
+} from "./index";
 
 describe("getAdapter", () => {
   it("returns MTR adapter for 'mtr'", () => {

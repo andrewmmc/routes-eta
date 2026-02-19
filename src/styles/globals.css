@@ -6,7 +6,8 @@
 
   /* MTR Board Fonts */
   --font-mtr-chinese: "Noto Serif TC", serif;
-  --font-mtr-english: "Myriad Pro", "Open Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mtr-english:
+    "Myriad Pro", "Open Sans", "Helvetica Neue", Arial, sans-serif;
 }
 
 @theme inline {
@@ -15,7 +16,8 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-mtr-chinese: "Noto Serif TC", serif;
-  --font-mtr-english: "Myriad Pro", "Open Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mtr-english:
+    "Myriad Pro", "Open Sans", "Helvetica Neue", Arial, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {

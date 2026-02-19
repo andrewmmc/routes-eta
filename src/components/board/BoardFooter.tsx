@@ -34,7 +34,7 @@ export function BoardFooter({ boardState }: BoardFooterProps) {
 
       {/* Last Updated */}
       <div className="text-right text-sm text-gray-400">
-        {t('board.lastUpdated')}: {formattedTime}
+        {t("board.lastUpdated")}: {formattedTime}
       </div>
     </div>
   );

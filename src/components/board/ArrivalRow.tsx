@@ -33,7 +33,7 @@ export function ArrivalRow({
   // TODO: Add platform highlight
 
   const destinationName = getLocalizedName(
-    { name: arrival.destination ?? '', nameZh: arrival.destinationZh },
+    { name: arrival.destination ?? "", nameZh: arrival.destinationZh },
     language
   );
 
@@ -48,9 +48,7 @@ export function ArrivalRow({
 
       {/* Destination */}
       <div className="flex-1">
-        <div className="text-lg font-semibold">
-          {destinationName}
-        </div>
+        <div className="text-lg font-semibold">{destinationName}</div>
         {arrival.status && (
           <div className="text-sm text-gray-500">{arrival.status}</div>
         )}
@@ -59,7 +57,7 @@ export function ArrivalRow({
       {/* Train Length */}
       {showTrainLength && arrival.trainLength && (
         <div className="mx-4 text-sm text-gray-400">
-          {arrival.trainLength} {t('board.cars')}
+          {arrival.trainLength} {t("board.cars")}
         </div>
       )}
 

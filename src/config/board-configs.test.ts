@@ -55,7 +55,18 @@ describe("getBoardConfigFromParams", () => {
   });
 
   it("returns default layout for any MTR line", () => {
-    const lines = ["TWL", "ISL", "KTL", "EAL", "TML", "TCL", "TKL", "AEL", "DRL", "SIL"];
+    const lines = [
+      "TWL",
+      "ISL",
+      "KTL",
+      "EAL",
+      "TML",
+      "TCL",
+      "TKL",
+      "AEL",
+      "DRL",
+      "SIL",
+    ];
 
     for (const line of lines) {
       const config = getBoardConfigFromParams("mtr", line, "CEN");

@@ -39,16 +39,66 @@ export interface MtrDirectionEntry {
 // ─── Static Data ──────────────────────────────────────────────────────────────
 
 export const MTR_LINES: Record<string, MtrLineInfo> = {
-  AEL: { code: "AEL", nameEn: "Airport Express",        nameZh: "機場快綫", color: "#00888A" },
-  DRL: { code: "DRL", nameEn: "Disneyland Resort Line", nameZh: "迪士尼綫", color: "#F173AC" },
-  EAL: { code: "EAL", nameEn: "East Rail Line",         nameZh: "東鐵綫",   color: "#53B7E8" },
-  ISL: { code: "ISL", nameEn: "Island Line",            nameZh: "港島綫",   color: "#007DC5" },
-  KTL: { code: "KTL", nameEn: "Kwun Tong Line",         nameZh: "觀塘綫",   color: "#00AB4E" },
-  TML: { code: "TML", nameEn: "Tuen Ma Line",           nameZh: "屯馬綫",   color: "#923011" },
-  TCL: { code: "TCL", nameEn: "Tung Chung Line",        nameZh: "東涌綫",   color: "#F7943E" },
-  TKL: { code: "TKL", nameEn: "Tseung Kwan O Line",     nameZh: "將軍澳綫", color: "#7D499D" },
-  TWL: { code: "TWL", nameEn: "Tsuen Wan Line",         nameZh: "荃灣綫",   color: "#ED1D24" },
-  SIL: { code: "SIL", nameEn: "South Island Line",      nameZh: "南港島綫", color: "#BAC429" },
+  AEL: {
+    code: "AEL",
+    nameEn: "Airport Express",
+    nameZh: "機場快綫",
+    color: "#00888A",
+  },
+  DRL: {
+    code: "DRL",
+    nameEn: "Disneyland Resort Line",
+    nameZh: "迪士尼綫",
+    color: "#F173AC",
+  },
+  EAL: {
+    code: "EAL",
+    nameEn: "East Rail Line",
+    nameZh: "東鐵綫",
+    color: "#53B7E8",
+  },
+  ISL: {
+    code: "ISL",
+    nameEn: "Island Line",
+    nameZh: "港島綫",
+    color: "#007DC5",
+  },
+  KTL: {
+    code: "KTL",
+    nameEn: "Kwun Tong Line",
+    nameZh: "觀塘綫",
+    color: "#00AB4E",
+  },
+  TML: {
+    code: "TML",
+    nameEn: "Tuen Ma Line",
+    nameZh: "屯馬綫",
+    color: "#923011",
+  },
+  TCL: {
+    code: "TCL",
+    nameEn: "Tung Chung Line",
+    nameZh: "東涌綫",
+    color: "#F7943E",
+  },
+  TKL: {
+    code: "TKL",
+    nameEn: "Tseung Kwan O Line",
+    nameZh: "將軍澳綫",
+    color: "#7D499D",
+  },
+  TWL: {
+    code: "TWL",
+    nameEn: "Tsuen Wan Line",
+    nameZh: "荃灣綫",
+    color: "#ED1D24",
+  },
+  SIL: {
+    code: "SIL",
+    nameEn: "South Island Line",
+    nameZh: "南港島綫",
+    color: "#BAC429",
+  },
 };
 
 // Re-export with explicit type so consumers always get MtrDirectionEntry[]
@@ -85,7 +135,11 @@ export function getMtrStationInfo(
 }
 
 /** Format termini names, joining multiple alternatives with "/" */
-function formatTermini(terminiCodes: string[], stations: MtrStationEntry[], getName: (s: MtrStationEntry) => string): string {
+function formatTermini(
+  terminiCodes: string[],
+  stations: MtrStationEntry[],
+  getName: (s: MtrStationEntry) => string
+): string {
   const names = terminiCodes
     .map((code) => stations.find((s) => s.code === code))
     .filter((s): s is MtrStationEntry => s !== undefined)
@@ -95,16 +149,32 @@ function formatTermini(terminiCodes: string[], stations: MtrStationEntry[], getN
 
 /** Returns "First Station → Last Station" label in English. */
 export function getDirectionLabel(entry: MtrDirectionEntry): string {
-  const startLabel = formatTermini(entry.startTermini, entry.stations, (s) => s.nameEn);
-  const endLabel = formatTermini(entry.endTermini, entry.stations, (s) => s.nameEn);
+  const startLabel = formatTermini(
+    entry.startTermini,
+    entry.stations,
+    (s) => s.nameEn
+  );
+  const endLabel = formatTermini(
+    entry.endTermini,
+    entry.stations,
+    (s) => s.nameEn
+  );
   if (!startLabel || !endLabel) return entry.direction;
   return `${startLabel} → ${endLabel}`;
 }
 
 /** Returns "首站 → 終站" label in Chinese. */
 export function getDirectionLabelZh(entry: MtrDirectionEntry): string {
-  const startLabel = formatTermini(entry.startTermini, entry.stations, (s) => s.nameZh);
-  const endLabel = formatTermini(entry.endTermini, entry.stations, (s) => s.nameZh);
+  const startLabel = formatTermini(
+    entry.startTermini,
+    entry.stations,
+    (s) => s.nameZh
+  );
+  const endLabel = formatTermini(
+    entry.endTermini,
+    entry.stations,
+    (s) => s.nameZh
+  );
   if (!startLabel || !endLabel) return entry.direction;
   return `${startLabel} → ${endLabel}`;
 }

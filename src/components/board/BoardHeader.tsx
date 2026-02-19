@@ -27,14 +27,13 @@ export function BoardHeader({ boardState }: BoardHeaderProps) {
   const operatorName = getLocalizedName(operator, language);
   const serviceName = getLocalizedName(service, language);
   const stationName = getLocalizedName(station, language);
-  const directionLabel = service.direction === "up" ? t('home.up') : t('home.down');
+  const directionLabel =
+    service.direction === "up" ? t("home.up") : t("home.down");
 
   return (
     <div className="mb-4 border-b-4 pb-4" style={{ borderColor: lineColor }}>
       {/* Operator */}
-      <div className="text-sm text-gray-500">
-        {operatorName}
-      </div>
+      <div className="text-sm text-gray-500">{operatorName}</div>
 
       {/* Line Name */}
       <div className="flex items-center gap-3">
@@ -51,7 +50,7 @@ export function BoardHeader({ boardState }: BoardHeaderProps) {
       {/* Direction */}
       {service.direction && (
         <div className="text-sm text-gray-400">
-          {language === 'zh' ? '往' : 'To'} {directionLabel}
+          {language === "zh" ? "往" : "To"} {directionLabel}
         </div>
       )}
     </div>
