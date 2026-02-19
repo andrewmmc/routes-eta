@@ -10,6 +10,8 @@
 
 import type { Arrival } from "../../models";
 import { formatETA } from "../../lib/api";
+import { useTranslation } from "@/hooks/useTranslation";
+import { getLocalizedName } from "@/utils/localization";
 
 export interface ArrivalRowProps {
   arrival: Arrival;
@@ -24,9 +26,16 @@ export function ArrivalRow({
   showCrowding = false,
   showTrainLength = false,
 }: ArrivalRowProps) {
+  const { t, language } = useTranslation();
+
   // TODO: Add proper styling with Tailwind
   // TODO: Add color coding based on crowding level
   // TODO: Add platform highlight
+
+  const destinationName = getLocalizedName(
+    { name: arrival.destination, nameZh: arrival.destinationZh },
+    language
+  );
 
   return (
     <div className="flex items-center justify-between border-b border-gray-200 py-3">
@@ -40,7 +49,7 @@ export function ArrivalRow({
       {/* Destination */}
       <div className="flex-1">
         <div className="text-lg font-semibold">
-          {arrival.destinationZh || arrival.destination}
+          {destinationName}
         </div>
         {arrival.status && (
           <div className="text-sm text-gray-500">{arrival.status}</div>
@@ -50,7 +59,7 @@ export function ArrivalRow({
       {/* Train Length */}
       {showTrainLength && arrival.trainLength && (
         <div className="mx-4 text-sm text-gray-400">
-          {arrival.trainLength} 卡
+          {arrival.trainLength} {t('board.cars')}
         </div>
       )}
 

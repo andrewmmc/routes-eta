@@ -21,10 +21,13 @@ import { useBoardData } from "../../hooks";
 import { LoadingBoard } from "../../components/ui/LoadingSpinner";
 import { ErrorDisplay } from "../../components/ui/ErrorDisplay";
 import { getBoardConfigFromParams } from "../../config";
+import { useTranslation } from "@/hooks/useTranslation";
+import { getLocalizedName, formatLocalizedTime } from "@/utils/localization";
 
 export default function BoardPage() {
   const router = useRouter();
   const params = router.query.params as string[] | undefined;
+  const { t, language } = useTranslation();
 
   // Parse URL params with empty-string fallbacks so hooks are always called
   // TODO: Add proper validation
@@ -56,7 +59,7 @@ export default function BoardPage() {
 
   if (!operatorId || !serviceId || !stopId) {
     return (
-      <ErrorDisplay message="Invalid URL parameters. Format: /board/[operator]/[service]/[station]" />
+      <ErrorDisplay message={t('errors.invalidUrl')} />
     );
   }
 
@@ -84,14 +87,13 @@ export default function BoardPage() {
   const isMTR = operatorId === "mtr";
 
   // Format last updated for page title
-  const lastUpdatedStr = data.lastUpdated.toLocaleTimeString("zh-HK", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  });
+  const lastUpdatedStr = formatLocalizedTime(data.lastUpdated, language);
 
-  const pageTitle = `${data.station.nameZh || data.station.name} | ${data.service.nameZh || data.service.name} | 更新: ${lastUpdatedStr}`;
+  const stationName = getLocalizedName(data.station, language);
+  const serviceName = getLocalizedName(data.service, language);
+  const updateLabel = t('board.lastUpdated');
+
+  const pageTitle = `${stationName} | ${serviceName} | ${updateLabel}: ${lastUpdatedStr}`;
 
   if (isMTR) {
     return (

@@ -10,6 +10,8 @@
  */
 
 import type { BoardState } from "../../models";
+import { useTranslation } from "@/hooks/useTranslation";
+import { getLocalizedName } from "@/utils/localization";
 
 export interface BoardHeaderProps {
   boardState: BoardState;
@@ -17,15 +19,21 @@ export interface BoardHeaderProps {
 
 export function BoardHeader({ boardState }: BoardHeaderProps) {
   const { operator, station, service } = boardState;
+  const { t, language } = useTranslation();
 
   // TODO: Get line color from service config
   const lineColor = service.color || "#000000";
+
+  const operatorName = getLocalizedName(operator, language);
+  const serviceName = getLocalizedName(service, language);
+  const stationName = getLocalizedName(station, language);
+  const directionLabel = service.direction === "up" ? t('home.up') : t('home.down');
 
   return (
     <div className="mb-4 border-b-4 pb-4" style={{ borderColor: lineColor }}>
       {/* Operator */}
       <div className="text-sm text-gray-500">
-        {operator.name} {operator.nameZh}
+        {operatorName}
       </div>
 
       {/* Line Name */}
@@ -34,16 +42,16 @@ export function BoardHeader({ boardState }: BoardHeaderProps) {
           className="h-8 w-3 rounded"
           style={{ backgroundColor: lineColor }}
         />
-        <h1 className="text-3xl font-bold">{service.nameZh || service.name}</h1>
+        <h1 className="text-3xl font-bold">{serviceName}</h1>
       </div>
 
       {/* Station Name */}
-      <div className="mt-2 text-xl">{station.nameZh || station.name}</div>
+      <div className="mt-2 text-xl">{stationName}</div>
 
       {/* Direction */}
       {service.direction && (
         <div className="text-sm text-gray-400">
-          往 {service.direction === "up" ? "Up" : "Down"}
+          {language === 'zh' ? '往' : 'To'} {directionLabel}
         </div>
       )}
     </div>

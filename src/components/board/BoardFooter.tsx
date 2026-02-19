@@ -8,6 +8,8 @@
  */
 
 import type { BoardState } from "../../models";
+import { useTranslation } from "@/hooks/useTranslation";
+import { formatLocalizedTime } from "@/utils/localization";
 
 export interface BoardFooterProps {
   boardState: BoardState;
@@ -15,13 +17,9 @@ export interface BoardFooterProps {
 
 export function BoardFooter({ boardState }: BoardFooterProps) {
   const { lastUpdated, alerts } = boardState;
+  const { t, language } = useTranslation();
 
-  // TODO: Format time properly with locale
-  const formattedTime = lastUpdated.toLocaleTimeString("zh-HK", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
+  const formattedTime = formatLocalizedTime(lastUpdated, language);
 
   return (
     <div className="mt-4 border-t border-gray-200 pt-4">
@@ -36,7 +34,7 @@ export function BoardFooter({ boardState }: BoardFooterProps) {
 
       {/* Last Updated */}
       <div className="text-right text-sm text-gray-400">
-        最後更新: {formattedTime}
+        {t('board.lastUpdated')}: {formattedTime}
       </div>
     </div>
   );

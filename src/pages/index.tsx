@@ -15,6 +15,9 @@ import {
   type MtrDirectionEntry,
   type MtrStationEntry,
 } from "../data/mtr";
+import { useTranslation } from "@/hooks/useTranslation";
+import { getLocalizedName } from "@/utils/localization";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 const LINE_ORDER = [
   "AEL",
@@ -31,6 +34,7 @@ const LINE_ORDER = [
 
 export default function HomePage() {
   const router = useRouter();
+  const { t, language } = useTranslation();
 
   const [selectedLine, setSelectedLine] = useState<string>("");
   const [selectedDirection, setSelectedDirection] = useState<string>("");
@@ -82,32 +86,38 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="mx-auto max-w-2xl">
-        <h1 className="mb-2 text-center text-3xl font-bold">Routes ETA</h1>
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex-1" />
+          <h1 className="flex-1 text-center text-3xl font-bold">{t('home.title')}</h1>
+          <div className="flex flex-1 justify-end">
+            <LanguageSelector />
+          </div>
+        </div>
         <p className="mb-8 text-center text-gray-600">
-          Hong Kong Transport Arrival Board Display
+          {t('home.subtitle')}
         </p>
 
         {/* Board Selector */}
         <div className="rounded-lg bg-white p-6 shadow">
-          <h2 className="mb-5 text-xl font-semibold">Select Board</h2>
+          <h2 className="mb-5 text-xl font-semibold">{t('home.selectBoard')}</h2>
 
           {/* Line selector */}
           <div className="mb-4">
             <label className="mb-1 block text-sm font-medium text-gray-700">
-              Line
+              {t('home.line')}
             </label>
             <select
               className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
               value={selectedLine}
               onChange={(e) => handleLineChange(e.target.value)}
             >
-              <option value="">Select a line...</option>
+              <option value="">{t('home.selectLine')}</option>
               {LINE_ORDER.map((code) => {
                 const line = MTR_LINES[code];
                 if (!line) return null;
                 return (
                   <option key={code} value={code}>
-                    {line.nameEn} ({line.nameZh})
+                    {getLocalizedName({ name: line.nameEn, nameZh: line.nameZh }, language)}
                   </option>
                 );
               })}
@@ -117,7 +127,7 @@ export default function HomePage() {
           {/* Direction selector */}
           <div className="mb-4">
             <label className="mb-1 block text-sm font-medium text-gray-700">
-              Direction
+              {t('home.direction')}
             </label>
             <select
               className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
@@ -125,10 +135,10 @@ export default function HomePage() {
               onChange={(e) => handleDirectionChange(e.target.value)}
               disabled={!selectedLine}
             >
-              <option value="">Select a direction...</option>
+              <option value="">{t('home.selectDirection')}</option>
               {directions.map((d) => (
                 <option key={d.urlDirection} value={d.urlDirection}>
-                  {getDirectionLabel(d)} ({getDirectionLabelZh(d)})
+                  {language === 'zh' ? getDirectionLabelZh(d) : getDirectionLabel(d)}
                 </option>
               ))}
             </select>
@@ -137,7 +147,7 @@ export default function HomePage() {
           {/* Station selector */}
           <div className="mb-6">
             <label className="mb-1 block text-sm font-medium text-gray-700">
-              Station
+              {t('home.station')}
             </label>
             <select
               className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
@@ -145,10 +155,10 @@ export default function HomePage() {
               onChange={(e) => setSelectedStation(e.target.value)}
               disabled={!selectedDirection}
             >
-              <option value="">Select a station...</option>
+              <option value="">{t('home.selectStation')}</option>
               {stations.map((s) => (
                 <option key={s.code} value={s.code}>
-                  {s.nameEn} ({s.nameZh})
+                  {getLocalizedName({ name: s.nameEn, nameZh: s.nameZh }, language)}
                 </option>
               ))}
             </select>
@@ -165,7 +175,7 @@ export default function HomePage() {
             }
             className="w-full rounded-md px-4 py-2 text-sm font-medium text-white transition hover:brightness-90 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
           >
-            View Arrival Board
+            {t('home.viewBoard')}
           </button>
 
           {boardUrl && (

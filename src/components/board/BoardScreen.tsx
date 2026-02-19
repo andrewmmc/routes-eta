@@ -14,6 +14,7 @@ import type { BoardLayoutConfig } from "../../config";
 import { BoardHeader } from "./BoardHeader";
 import { BoardFooter } from "./BoardFooter";
 import { ArrivalRow } from "./ArrivalRow";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export interface BoardScreenProps {
   boardState: BoardState;
@@ -21,6 +22,8 @@ export interface BoardScreenProps {
 }
 
 export function BoardScreen({ boardState, layout = {} }: BoardScreenProps) {
+  const { t } = useTranslation();
+
   // Merge default layout with provided layout
   const config: BoardLayoutConfig = {
     rows: layout.rows ?? 4,
@@ -40,15 +43,15 @@ export function BoardScreen({ boardState, layout = {} }: BoardScreenProps) {
 
       {/* Column Headers */}
       <div className="mb-2 flex border-b border-gray-300 pb-2 text-sm text-gray-500">
-        {config.showPlatform && <div className="w-16 text-center">月台</div>}
-        <div className="flex-1">目的地</div>
+        {config.showPlatform && <div className="w-16 text-center">{t('board.platform')}</div>}
+        <div className="flex-1">{t('board.destination')}</div>
         {config.showTrainLength && (
-          <div className="mx-4 w-12 text-center">車卡</div>
+          <div className="mx-4 w-12 text-center">{t('board.trainLength')}</div>
         )}
         {config.showCrowding && (
-          <div className="mx-4 w-8 text-center">擠迫</div>
+          <div className="mx-4 w-8 text-center">{t('board.crowding')}</div>
         )}
-        <div className="w-24 text-right">到達</div>
+        <div className="w-24 text-right">{t('board.arrival')}</div>
       </div>
 
       {/* Arrival Rows */}
@@ -65,7 +68,7 @@ export function BoardScreen({ boardState, layout = {} }: BoardScreenProps) {
 
         {/* Empty state */}
         {displayedArrivals.length === 0 && (
-          <div className="py-16 text-center text-gray-400">暫無班次資料</div>
+          <div className="py-16 text-center text-gray-400">{t('board.noSchedule')}</div>
         )}
       </div>
 
