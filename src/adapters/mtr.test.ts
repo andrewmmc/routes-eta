@@ -444,15 +444,21 @@ describe("mtrAdapter.mapToBoardState", () => {
     expect(result.arrivals[1].isArrived).toBe(false);
   });
 
-  it("throws error when API status is not 1", async () => {
-    const raw = createMockApiResponse({
+  it("returns empty arrivals when API returns error response", async () => {
+    const raw = {
+      resultCode: 0,
+      timestamp: "2026-02-21 03:17:02",
       status: 0,
-      message: "Error",
-    });
+      message: "The contents are empty!",
+      error: {
+        errorCode: "NT-204",
+        errorMsg: "The contents are empty!",
+      },
+    };
 
-    await expect(
-      mtrAdapter.mapToBoardState(raw, defaultParams)
-    ).rejects.toThrow("MTR API returned failure status");
+    const result = await mtrAdapter.mapToBoardState(raw, defaultParams);
+    expect(result.arrivals).toHaveLength(0);
+    expect(result.lastUpdated.toISOString()).toBe("2026-02-20T19:17:02.000Z");
   });
 
   it("sets status to 'Delayed' when isdelay is Y", async () => {

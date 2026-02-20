@@ -46,14 +46,30 @@ const MtrLineStationDataSchema = z.object({
   DOWN: z.array(MtrArrivalSchema).optional(),
 });
 
-const MtrApiResponseSchema = z.object({
+const MtrSuccessResponseSchema = z.object({
   sys_time: z.string(),
   curr_time: z.string(),
-  status: z.number(),
+  status: z.literal(1),
   isdelay: z.string().optional(), // Optional per spec
   message: z.string(),
   data: z.record(z.string(), MtrLineStationDataSchema).optional(),
 });
+
+const MtrErrorResponseSchema = z.object({
+  resultCode: z.number(),
+  timestamp: z.string(),
+  status: z.literal(0),
+  message: z.string(),
+  error: z.object({
+    errorCode: z.string(),
+    errorMsg: z.string(),
+  }),
+});
+
+const MtrApiResponseSchema = z.union([
+  MtrSuccessResponseSchema,
+  MtrErrorResponseSchema,
+]);
 
 type MtrArrival = z.infer<typeof MtrArrivalSchema>;
 
@@ -181,12 +197,34 @@ export const mtrAdapter: TransportAdapter = {
   ): Promise<BoardState> {
     const validated = MtrApiResponseSchema.parse(raw);
 
-    if (validated.status !== 1) {
-      throw new Error(`MTR API returned failure status: ${validated.message}`);
-    }
-
     const lineInfo = MTR_LINES[params.serviceId];
     const stationInfo = getMtrStationInfo(params.serviceId, params.stopId);
+
+    // Handle error/unsuccessful responses by returning empty arrivals
+    if (validated.status === 0) {
+      return {
+        operator: {
+          id: "mtr",
+          name: "MTR",
+          nameZh: "港鐵",
+        },
+        station: {
+          id: params.stopId,
+          name: stationInfo?.nameEn ?? params.stopId,
+          nameZh: stationInfo?.nameZh ?? params.stopId,
+        },
+        service: {
+          id: params.serviceId,
+          name: lineInfo?.nameEn ?? params.serviceId,
+          nameZh: lineInfo?.nameZh ?? params.serviceId,
+          direction: params.directionId as "up" | "down",
+          color: lineInfo?.color ?? "#E2231A",
+        },
+        direction: params.directionId as "up" | "down",
+        arrivals: [],
+        lastUpdated: parseHktTime(validated.timestamp),
+      };
+    }
 
     // The data key uses the format "{LINE}-{STATION}"
     const dataKey = `${params.serviceId}-${params.stopId}`;
