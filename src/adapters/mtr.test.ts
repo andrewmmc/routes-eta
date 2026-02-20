@@ -55,22 +55,92 @@ describe("toApiDirection", () => {
 });
 
 describe("deriveStatus", () => {
-  it("returns 'Arriving' for timetype 'A'", () => {
-    expect(deriveStatus("A", false)).toBe("Arriving");
-    expect(deriveStatus("A", true)).toBe("Arriving"); // timetype takes precedence
+  const createParams = (
+    overrides: Partial<Parameters<typeof deriveStatus>[0]> = {}
+  ) => ({
+    arrivalTime: "2026-01-15 12:10:00",
+    currTime: "2026-01-15 12:00:00",
+    timetype: undefined,
+    valid: undefined,
+    isDelayed: false,
+    ...overrides,
   });
 
-  it("returns 'Departing' for timetype 'D'", () => {
-    expect(deriveStatus("D", false)).toBe("Departing");
-    expect(deriveStatus("D", true)).toBe("Departing"); // timetype takes precedence
+  it("returns 'Arriving' when within 1 minute threshold", () => {
+    expect(
+      deriveStatus(
+        createParams({
+          arrivalTime: "2026-01-15 12:00:30",
+          currTime: "2026-01-15 12:00:00",
+        })
+      )
+    ).toBe("Arriving");
+    expect(
+      deriveStatus(
+        createParams({
+          arrivalTime: "2026-01-15 12:01:00",
+          currTime: "2026-01-15 12:00:00",
+        })
+      )
+    ).toBe("Arriving");
   });
 
-  it("returns 'Delayed' when isDelayed is true and no timetype", () => {
-    expect(deriveStatus(undefined, true)).toBe("Delayed");
+  it("returns 'Arriving' for timetype 'A' (EAL)", () => {
+    expect(
+      deriveStatus(
+        createParams({ timetype: "A", arrivalTime: "2026-01-15 12:05:00" })
+      )
+    ).toBe("Arriving");
+    expect(deriveStatus(createParams({ timetype: "A", isDelayed: true }))).toBe(
+      "Arriving"
+    ); // time proximity takes precedence
+  });
+
+  it("returns 'Departing' for timetype 'D' (EAL)", () => {
+    expect(deriveStatus(createParams({ timetype: "D" }))).toBe("Departing");
+    expect(deriveStatus(createParams({ timetype: "D", isDelayed: true }))).toBe(
+      "Departing"
+    );
+  });
+
+  it("returns 'Scheduled' when valid is 'N'", () => {
+    expect(deriveStatus(createParams({ valid: "N" }))).toBe("Scheduled");
+    expect(deriveStatus(createParams({ valid: "N", isDelayed: true }))).toBe(
+      "Scheduled"
+    );
+  });
+
+  it("returns 'Delayed' when isDelayed is true and no other status applies", () => {
+    expect(deriveStatus(createParams({ isDelayed: true }))).toBe("Delayed");
   });
 
   it("returns undefined when no status applies", () => {
-    expect(deriveStatus(undefined, false)).toBe(undefined);
+    expect(deriveStatus(createParams())).toBe(undefined);
+    expect(deriveStatus(createParams({ valid: "Y" }))).toBe(undefined);
+  });
+
+  it("time proximity takes precedence over timetype", () => {
+    // Within threshold - returns "Arriving" regardless of timetype
+    expect(
+      deriveStatus(
+        createParams({
+          arrivalTime: "2026-01-15 12:00:30",
+          currTime: "2026-01-15 12:00:00",
+          timetype: "D",
+        })
+      )
+    ).toBe("Arriving");
+  });
+
+  it("returns undefined for past arrivals (negative diff)", () => {
+    expect(
+      deriveStatus(
+        createParams({
+          arrivalTime: "2026-01-15 11:59:00",
+          currTime: "2026-01-15 12:00:00",
+        })
+      )
+    ).toBe(undefined);
   });
 });
 

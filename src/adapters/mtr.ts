@@ -32,7 +32,7 @@ const MtrArrivalSchema = z.object({
   time: z.string(), // "YYYY-MM-DD HH:MM:SS" in HKT (UTC+8)
   // ttnt, valid, source are dummy fields per spec — kept for schema completeness only
   ttnt: z.union([z.string(), z.number()]).optional(),
-  valid: z.string().optional(),
+  valid: z.string().optional(), // "Y" = real ETA, "N" = timetable schedule only
   source: z.string().optional(),
   // EAL-only optional fields
   timetype: z.enum(["A", "D"]).optional(), // A = Arrival, D = Departure
@@ -97,17 +97,52 @@ export function toApiDirection(
   return null;
 }
 
+/** Threshold for "arriving" status (1 minute in milliseconds) */
+const ARRIVING_THRESHOLD_MS = 60000;
+
+export interface DeriveStatusParams {
+  /** Arrival time string from API (HKT format) */
+  arrivalTime: string;
+  /** Current time string from API (HKT format) */
+  currTime: string;
+  /** EAL-only: "A" = Arrival, "D" = Departure */
+  timetype?: "A" | "D";
+  /** "Y" = real ETA, "N" = timetable schedule only */
+  valid?: string;
+  /** Global delay flag */
+  isDelayed: boolean;
+}
+
 /**
- * Derive arrival status from per-arrival timetype and global isdelay flag.
- * timetype takes precedence as it is per-arrival; isdelay is a global fallback.
+ * Derive arrival status with priority:
+ * 1. Time proximity (within 1 min) → "Arriving"
+ * 2. timetype (EAL-only) → "Arriving" or "Departing"
+ * 3. valid === "N" → "Scheduled"
+ * 4. isDelayed → "Delayed"
  */
 export function deriveStatus(
-  timetype: "A" | "D" | undefined,
-  isDelayed: boolean
+  params: DeriveStatusParams
 ): ArrivalStatus | undefined {
+  const { arrivalTime, currTime, timetype, valid, isDelayed } = params;
+
+  // 1. Check time proximity
+  const arrivalDate = parseHktTime(arrivalTime);
+  const currDate = parseHktTime(currTime);
+  const diffMs = arrivalDate.getTime() - currDate.getTime();
+  if (diffMs <= ARRIVING_THRESHOLD_MS && diffMs >= 0) {
+    return ARRIVAL_STATUS.ARRIVING;
+  }
+
+  // 2. Check timetype (EAL-only)
   if (timetype === "A") return ARRIVAL_STATUS.ARRIVING;
   if (timetype === "D") return ARRIVAL_STATUS.DEPARTING;
+
+  // 3. Check valid field
+  if (valid === "N") return ARRIVAL_STATUS.SCHEDULED;
+
+  // 4. Check delay flag
   if (isDelayed) return ARRIVAL_STATUS.DELAYED;
+
   return undefined;
 }
 
@@ -264,7 +299,13 @@ export const mtrAdapter: TransportAdapter = {
         eta: parseHktTime(a.time),
         status: isArrived
           ? ARRIVAL_STATUS.ARRIVED
-          : deriveStatus(a.timetype, isDelayed),
+          : deriveStatus({
+              arrivalTime: a.time,
+              currTime: stationData?.curr_time ?? "",
+              timetype: a.timetype,
+              valid: a.valid,
+              isDelayed,
+            }),
         platform: a.plat,
         destination,
         destinationZh,
