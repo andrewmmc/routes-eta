@@ -108,7 +108,7 @@ export function MTRArrivalRow({
         {/* Column 1: Platform circle */}
         <div className="flex w-12 items-center justify-center md:w-20 lg:w-28">
           <div
-            className="flex h-8 w-8 items-center justify-center rounded-full text-3xl font-mtr-english text-white md:h-14 md:w-14 md:text-4xl lg:h-20 lg:w-20 lg:text-6xl"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-xl font-mtr-english text-white md:h-14 md:w-14 md:text-4xl lg:h-20 lg:w-20 lg:text-6xl"
             style={{ backgroundColor: lineColor }}
           >
             <span style={{ marginTop: "4px", lineHeight: 1 }}>
@@ -121,17 +121,17 @@ export function MTRArrivalRow({
         <div className="flex min-w-[100px] items-center justify-end gap-1 md:min-w-[240px] md:gap-3 lg:min-w-[320px] lg:gap-4">
           {arrival.isArrived ? null : isArrivingSoon ? ( // Train has arrived - leave column empty
             <span
-              className={`text-xl text-black md:text-4xl lg:text-6xl ${textFontClass}`}
+              className={`text-2xl text-black md:text-4xl lg:text-6xl ${textFontClass}`}
             >
               {labels.arriving}
             </span>
           ) : (
             <>
-              <span className="text-2xl font-mtr-english text-black md:text-5xl lg:text-7xl">
+              <span className="text-3xl font-mtr-english text-black md:text-5xl lg:text-7xl">
                 {formatETAMinutes(arrival.eta)}
               </span>
               <span
-                className={`text-lg text-black md:text-3xl lg:text-5xl ${textFontClass}`}
+                className={`text-xl text-black md:text-3xl lg:text-5xl ${textFontClass}`}
               >
                 {labels.minutes}
               </span>
