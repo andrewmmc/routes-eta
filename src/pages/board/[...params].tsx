@@ -6,15 +6,17 @@
  * URL Pattern: /board/:operatorId/:serviceId/:stationId/:direction?
  *
  * Examples:
- *   /board/mtr/tsuen-wan-line/central/up
+ *   /board/mtr/TWL/CEN/up
  *   /board/kmb/960/wan-chai
  *
- * TODO: Add proper error handling for invalid params
+ * Invalid routes are redirected to home page.
+ *
  * TODO: Add static generation for common routes
  * TODO: Add SEO metadata
  */
 
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { BoardScreen, MTRBoard } from "../../components/board";
@@ -25,6 +27,7 @@ import { getBoardConfigFromParams } from "../../config";
 import { useTranslation } from "@/hooks/useTranslation";
 import { getLocalizedName, formatLocalizedTime } from "@/utils/localization";
 import { getAdapter } from "../../adapters";
+import { validateMtrRouteParams } from "../../data/mtr";
 
 export default function BoardPage() {
   const router = useRouter();
@@ -32,9 +35,28 @@ export default function BoardPage() {
   const { t, language } = useTranslation();
 
   // Parse URL params with empty-string fallbacks so hooks are always called
-  // TODO: Add proper validation
   const [operatorId = "", serviceId = "", stopId = "", directionId] =
     params ?? [];
+
+  // Validate route params and redirect to home if invalid
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    // Check required params exist
+    if (!operatorId || !serviceId || !stopId || !directionId) {
+      router.replace("/");
+      return;
+    }
+
+    // Validate MTR routes
+    if (operatorId === "mtr") {
+      const isValid = validateMtrRouteParams(serviceId, stopId, directionId);
+      if (!isValid) {
+        router.replace("/");
+        return;
+      }
+    }
+  }, [router.isReady, router, operatorId, serviceId, stopId, directionId]);
 
   // Get board config (or create default)
   const config = getBoardConfigFromParams(
@@ -59,8 +81,9 @@ export default function BoardPage() {
     return <LoadingBoard />;
   }
 
-  if (!operatorId || !serviceId || !stopId) {
-    return <ErrorDisplay message={t("errors.invalidUrl")} />;
+  // Show loading while validating/redirecting
+  if (!operatorId || !serviceId || !stopId || !directionId) {
+    return <LoadingBoard />;
   }
 
   // Loading state

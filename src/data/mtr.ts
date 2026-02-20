@@ -175,3 +175,30 @@ export function getDirectionLabel(
 export function getDirectionLabelZh(entry: MtrDirectionEntry): string {
   return getDirectionLabel(entry, "zh");
 }
+
+/**
+ * Validate MTR route params
+ * @returns true if params are valid, false otherwise
+ */
+export function validateMtrRouteParams(
+  lineCode: string,
+  stationCode: string,
+  direction: string | undefined
+): boolean {
+  // Check line exists
+  if (!MTR_LINES[lineCode]) return false;
+
+  // Check direction is valid (up or down)
+  if (direction !== "up" && direction !== "down") return false;
+
+  // Check station exists in the line's direction
+  const directionEntry = getMtrDirectionEntry(lineCode, direction);
+  if (!directionEntry) return false;
+
+  const stationExists = directionEntry.stations.some(
+    (s) => s.code === stationCode
+  );
+  if (!stationExists) return false;
+
+  return true;
+}
