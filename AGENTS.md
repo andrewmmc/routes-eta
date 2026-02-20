@@ -22,10 +22,29 @@ This is a Hong Kong transport arrival display UI (MTR station screen style) buil
 
 ### Deployment: GitHub Pages (Static Export)
 
-This project is deployed to GitHub Pages and uses Next.js static export. **Only use Next.js features compatible with static export:**
+This project is deployed to GitHub Pages and uses Next.js static export (`output: 'export'`). **Only use Next.js features compatible with static export.**
 
-- ✅ **Allowed**: `useEffect`, `useState`, `useRouter` (client-side), dynamic routes with `[...params]`, client-side data fetching (SWR, fetch)
-- ❌ **Not allowed**: `getServerSideProps`, `getStaticProps`, `getInitialProps`, API routes, server-side middleware, Image Optimization (`next/image` with external URLs)
+**Supported:**
+
+- Server Components (run during `next build`)
+- Client Components with `useEffect`, `useState`, `useRouter`
+- Client-side data fetching (SWR, fetch)
+- Dynamic routes with `generateStaticParams()` (App Router) or pre-defined paths
+- `next/image` with custom loader (not default loader)
+- Route Handlers with static `GET` responses
+
+**NOT Supported:**
+
+- `getServerSideProps`, `getStaticProps` (Pages Router) for dynamic server logic
+- Middleware
+- Rewrites, Redirects, Headers (in `next.config.js`)
+- API Routes that rely on Request object
+- Cookies
+- Incremental Static Regeneration (ISR)
+- Image Optimization with default loader
+- Draft Mode
+- Server Actions
+- Intercepting Routes
 
 Route validation and redirects must be done client-side using `useEffect` + `router.replace()`, not server-side.
 
