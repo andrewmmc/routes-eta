@@ -20,6 +20,15 @@ npm run generate:mtr   # Regenerate src/data/mtr-directions.generated.ts from CS
 
 This is a Hong Kong transport arrival display UI (MTR station screen style) built with Next.js Page Router, TypeScript, Tailwind CSS, SWR, Zod, and next-intl.
 
+### Deployment: GitHub Pages (Static Export)
+
+This project is deployed to GitHub Pages and uses Next.js static export. **Only use Next.js features compatible with static export:**
+
+- ✅ **Allowed**: `useEffect`, `useState`, `useRouter` (client-side), dynamic routes with `[...params]`, client-side data fetching (SWR, fetch)
+- ❌ **Not allowed**: `getServerSideProps`, `getStaticProps`, `getInitialProps`, API routes, server-side middleware, Image Optimization (`next/image` with external URLs)
+
+Route validation and redirects must be done client-side using `useEffect` + `router.replace()`, not server-side.
+
 ### Key Pattern: Adapter Layer
 
 The UI does **not** directly consume external API data. All data flows through the adapter pattern:
