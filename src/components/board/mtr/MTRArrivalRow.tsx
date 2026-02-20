@@ -77,14 +77,14 @@ export function MTRArrivalRow({
       {/* Hidden elements to measure text width for both languages */}
       <span
         ref={zhTextRef}
-        className="invisible absolute whitespace-nowrap text-2xl font-mtr-chinese md:text-5xl lg:text-7xl"
+        className="invisible absolute whitespace-nowrap text-3xl font-mtr-chinese md:text-5xl lg:text-7xl"
         aria-hidden="true"
       >
         {destinationZh}
       </span>
       <span
         ref={enTextRef}
-        className="invisible absolute whitespace-nowrap text-2xl font-mtr-english md:text-5xl lg:text-7xl"
+        className="invisible absolute whitespace-nowrap text-3xl font-mtr-english md:text-5xl lg:text-7xl"
         aria-hidden="true"
       >
         {destinationEn}
@@ -96,7 +96,7 @@ export function MTRArrivalRow({
         className={`min-w-0 flex-1 whitespace-nowrap ${shouldMarquee ? "mtr-marquee-container" : ""}`}
       >
         <span
-          className={`inline-block whitespace-nowrap text-2xl text-black md:text-5xl lg:text-7xl ${textFontClass} ${shouldMarquee ? "mtr-marquee-content" : ""}`}
+          className={`inline-block whitespace-nowrap text-3xl text-black md:text-5xl lg:text-7xl ${textFontClass} ${shouldMarquee ? "mtr-marquee-content" : ""}`}
           style={shouldMarquee ? { paddingRight: "2rem" } : undefined}
         >
           {shouldMarquee ? `${destination}　　　　${destination}` : destination}
