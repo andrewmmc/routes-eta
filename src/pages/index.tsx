@@ -4,7 +4,7 @@
  * Landing page with MTR line/station/direction selector
  */
 
-import { useState, useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import {
@@ -57,9 +57,10 @@ export default function HomePage() {
   const router = useRouter();
   const { t, language } = useTranslation();
 
-  const [selectedLine, setSelectedLine] = useState<string>("");
-  const [selectedDirection, setSelectedDirection] = useState<string>("");
-  const [selectedStation, setSelectedStation] = useState<string>("");
+  // Read state directly from URL params
+  const selectedLine = (router.query.line as string) || "";
+  const selectedDirection = (router.query.direction as string) || "";
+  const selectedStation = (router.query.station as string) || "";
 
   const directions = useMemo<MtrDirectionEntry[]>(() => {
     if (!selectedLine) return [];
@@ -80,22 +81,44 @@ export default function HomePage() {
     ? `/board/mtr/${selectedLine}/${selectedStation}/${selectedDirection}`
     : null;
 
+  // Update URL params
+  const updateUrlParams = useCallback(
+    (params: { line?: string; direction?: string; station?: string }) => {
+      const query: Record<string, string> = {};
+      const newLine = params.line !== undefined ? params.line : selectedLine;
+      const newDirection =
+        params.direction !== undefined ? params.direction : selectedDirection;
+      const newStation =
+        params.station !== undefined ? params.station : selectedStation;
+
+      if (newLine) query.line = newLine;
+      if (newDirection) query.direction = newDirection;
+      if (newStation) query.station = newStation;
+
+      router.replace({ pathname: "/", query }, undefined, { shallow: true });
+    },
+    [router, selectedLine, selectedDirection, selectedStation]
+  );
+
   function handleLineChange(lineCode: string) {
-    setSelectedLine(lineCode);
-    setSelectedDirection("");
-    setSelectedStation("");
+    updateUrlParams({ line: lineCode, direction: "", station: "" });
   }
 
   function handleDirectionChange(dir: string) {
-    setSelectedDirection(dir);
     // Keep the selected station if it also exists in the new direction
     const newEntry = MTR_LINE_DIRECTIONS.find(
       (d) => d.lineCode === selectedLine && d.urlDirection === dir
     );
     const codesInNewDir = newEntry?.stations.map((s) => s.code) ?? [];
     if (!codesInNewDir.includes(selectedStation)) {
-      setSelectedStation("");
+      updateUrlParams({ direction: dir, station: "" });
+    } else {
+      updateUrlParams({ direction: dir });
     }
+  }
+
+  function handleStationChange(stationCode: string) {
+    updateUrlParams({ station: stationCode });
   }
 
   function handleGo() {
@@ -182,7 +205,7 @@ export default function HomePage() {
               <select
                 className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
                 value={selectedStation}
-                onChange={(e) => setSelectedStation(e.target.value)}
+                onChange={(e) => handleStationChange(e.target.value)}
                 disabled={!selectedDirection}
               >
                 <option value="">{t("home.selectStation")}</option>
