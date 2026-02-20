@@ -18,7 +18,7 @@ import type {
   AdapterCapabilities,
 } from "./base";
 import type { BoardState } from "../models";
-import { ARRIVAL_STATUS } from "../models/arrival";
+import { ARRIVAL_STATUS, type ArrivalStatus } from "../models/arrival";
 import { MTR_LINES, getMtrStationInfo } from "../data/mtr";
 
 // ── Zod schemas ────────────────────────────────────────────────────────────────
@@ -104,7 +104,7 @@ export function toApiDirection(
 export function deriveStatus(
   timetype: "A" | "D" | undefined,
   isDelayed: boolean
-): string | undefined {
+): ArrivalStatus | undefined {
   if (timetype === "A") return ARRIVAL_STATUS.ARRIVING;
   if (timetype === "D") return ARRIVAL_STATUS.DEPARTING;
   if (isDelayed) return ARRIVAL_STATUS.DELAYED;
@@ -262,11 +262,12 @@ export const mtrAdapter: TransportAdapter = {
 
       return {
         eta: parseHktTime(a.time),
-        status: deriveStatus(a.timetype, isDelayed),
+        status: isArrived
+          ? ARRIVAL_STATUS.ARRIVED
+          : deriveStatus(a.timetype, isDelayed),
         platform: a.plat,
         destination,
         destinationZh,
-        isArrived,
       };
     });
 

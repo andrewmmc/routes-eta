@@ -7,6 +7,7 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import type { Arrival } from "../../../models";
+import { ARRIVAL_STATUS } from "../../../models/arrival";
 import type { Language } from "@/types/language";
 import { getMtrLabels } from "@/constants/mtr-labels";
 import {
@@ -121,7 +122,7 @@ export function MTRArrivalRow({
 
         {/* Column 2: ETA */}
         <div className="flex min-w-[100px] items-center justify-end gap-1 md:min-w-[240px] md:gap-3 lg:min-w-[320px] lg:gap-4">
-          {arrival.isArrived ? null : isArrivingSoon ? ( // Train has arrived - leave column empty
+          {arrival.status === ARRIVAL_STATUS.ARRIVED ? null : isArrivingSoon ? ( // Train has arrived - leave column empty
             <span
               className={`text-2xl text-black md:text-4xl lg:text-6xl ${textFontClass}`}
             >

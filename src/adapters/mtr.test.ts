@@ -425,7 +425,7 @@ describe("mtrAdapter.mapToBoardState", () => {
     expect(result.arrivals).toHaveLength(2);
   });
 
-  it("sets isArrived when curr_time equals arrival time", async () => {
+  it("sets status to 'Arrived' when curr_time equals arrival time", async () => {
     const raw = createMockApiResponse({
       data: {
         "TWL-CEN": {
@@ -440,8 +440,8 @@ describe("mtrAdapter.mapToBoardState", () => {
     });
 
     const result = await mtrAdapter.mapToBoardState(raw, defaultParams);
-    expect(result.arrivals[0].isArrived).toBe(true);
-    expect(result.arrivals[1].isArrived).toBe(false);
+    expect(result.arrivals[0].status).toBe("Arrived");
+    expect(result.arrivals[1].status).toBeUndefined();
   });
 
   it("returns empty arrivals when API returns error response", async () => {
@@ -492,5 +492,31 @@ describe("mtrAdapter.mapToBoardState", () => {
 
     const result = await mtrAdapter.mapToBoardState(raw, defaultParams);
     expect(result.arrivals[0].status).toBe("Arriving");
+  });
+
+  it("returns empty arrivals when API returns train fault response (dashed times)", async () => {
+    const raw = {
+      sys_time: "-",
+      curr_time: "-",
+      data: {
+        "TWL-TWH": {
+          curr_time: "-",
+          sys_time: "-",
+        },
+      },
+      isdelay: "N",
+      status: 1,
+      message: "successful",
+    };
+
+    const params: FetchParams = {
+      stopId: "TWH",
+      serviceId: "TWL",
+      directionId: "down",
+    };
+
+    const result = await mtrAdapter.mapToBoardState(raw, params);
+    expect(result.arrivals).toHaveLength(0);
+    expect(result.lastUpdated).toBeInstanceOf(Date);
   });
 });

@@ -88,7 +88,6 @@ describe("filterByMaxEta", () => {
         destination: "Tsuen Wan",
         destinationZh: "荃灣",
         status: "Departing",
-        isArrived: false,
       },
     ];
 
@@ -97,7 +96,6 @@ describe("filterByMaxEta", () => {
     expect(result[0].destination).toBe("Tsuen Wan");
     expect(result[0].destinationZh).toBe("荃灣");
     expect(result[0].status).toBe("Departing");
-    expect(result[0].isArrived).toBe(false);
   });
 });
 
