@@ -95,6 +95,60 @@ export function deriveStatus(
   return undefined;
 }
 
+export interface DestinationTextResult {
+  destination: string;
+  destinationZh: string;
+}
+
+export interface DestinationParams {
+  serviceId: string;
+  stopId: string;
+  directionId: string | undefined;
+  destCode: string;
+  destNameEn: string | undefined;
+  destNameZh: string | undefined;
+  isViaRacecourse: boolean;
+}
+
+/**
+ * Get destination text for an arrival, handling special cases like AEL.
+ */
+export function getDestinationText(
+  params: DestinationParams
+): DestinationTextResult {
+  const {
+    serviceId,
+    stopId,
+    directionId,
+    destCode,
+    destNameEn,
+    destNameZh,
+    isViaRacecourse,
+  } = params;
+
+  // Special case: AEL UP direction at HOK, KOW, TSY shows "Airport & AsiaWorld-Expo"
+  // but only when the actual destination is AWE (AsiaWorld-Expo)
+  const isAelUpFromCityToAwe =
+    serviceId === "AEL" &&
+    directionId === "up" &&
+    ["HOK", "KOW", "TSY"].includes(stopId) &&
+    destCode === "AWE";
+
+  if (isAelUpFromCityToAwe) {
+    return {
+      destination: "Airport & AsiaWorld-Expo",
+      destinationZh: "機場及博覽館",
+    };
+  }
+
+  return {
+    destination:
+      (destNameEn ?? destCode) + (isViaRacecourse ? " via Racecourse" : ""),
+    destinationZh:
+      (destNameZh ?? destCode) + (isViaRacecourse ? " 經馬場" : ""),
+  };
+}
+
 // ── Adapter ────────────────────────────────────────────────────────────────────
 
 export const MTR_CAPABILITIES: AdapterCapabilities = {
@@ -155,19 +209,15 @@ export const mtrAdapter: TransportAdapter = {
       const destStation = getMtrStationInfo(params.serviceId, a.dest);
       const isViaRacecourse = a.route === "RAC";
 
-      // Special case: AEL UP direction at HOK, KOW, TSY shows "Airport & AsiaWorld-Expo"
-      const isAelUpFromCity =
-        params.serviceId === "AEL" &&
-        params.directionId === "up" &&
-        ["HOK", "KOW", "TSY"].includes(params.stopId);
-
-      const destination = isAelUpFromCity
-        ? "Airport & AsiaWorld-Expo"
-        : (destStation?.nameEn ?? a.dest) +
-          (isViaRacecourse ? " via Racecourse" : "");
-      const destinationZh = isAelUpFromCity
-        ? "機場及博覽館"
-        : (destStation?.nameZh ?? a.dest) + (isViaRacecourse ? " 經馬場" : "");
+      const { destination, destinationZh } = getDestinationText({
+        serviceId: params.serviceId,
+        stopId: params.stopId,
+        directionId: params.directionId,
+        destCode: a.dest,
+        destNameEn: destStation?.nameEn,
+        destNameZh: destStation?.nameZh,
+        isViaRacecourse,
+      });
 
       // Check if train has arrived: curr_time equals arrival time
       const isArrived = stationData?.curr_time === a.time;

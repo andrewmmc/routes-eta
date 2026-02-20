@@ -113,7 +113,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-2xl">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex-1" />
-            <h1 className="flex-1 text-center text-3xl font-bold">
+            <h1 className="flex-[2] text-center text-3xl font-bold">
               {t("home.title")}
             </h1>
             <div className="flex flex-1 justify-end">

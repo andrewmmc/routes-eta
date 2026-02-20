@@ -21,6 +21,7 @@ export interface MTRArrivalRowProps {
   index: number;
   lineColor?: string;
   language: Language;
+  isDepartureStation?: boolean;
 }
 
 export function MTRArrivalRow({
@@ -28,6 +29,7 @@ export function MTRArrivalRow({
   index,
   lineColor = MTR_COLORS.defaultLine,
   language,
+  isDepartureStation = false,
 }: MTRArrivalRowProps) {
   const bgColor = getRowBgClass(index);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -123,7 +125,7 @@ export function MTRArrivalRow({
             <span
               className={`text-2xl text-black md:text-4xl lg:text-6xl ${textFontClass}`}
             >
-              {labels.arriving}
+              {isDepartureStation ? labels.departing : labels.arriving}
             </span>
           ) : (
             <>

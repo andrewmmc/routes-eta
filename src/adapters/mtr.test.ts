@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { parseHktTime, toApiDirection, deriveStatus, mtrAdapter } from "./mtr";
+import {
+  parseHktTime,
+  toApiDirection,
+  deriveStatus,
+  getDestinationText,
+  mtrAdapter,
+} from "./mtr";
 import type { FetchParams } from "./base";
 
 describe("parseHktTime", () => {
@@ -65,6 +71,145 @@ describe("deriveStatus", () => {
 
   it("returns undefined when no status applies", () => {
     expect(deriveStatus(undefined, false)).toBe(undefined);
+  });
+});
+
+describe("getDestinationText", () => {
+  it("returns standard destination text for normal lines", () => {
+    const result = getDestinationText({
+      serviceId: "TWL",
+      stopId: "CEN",
+      directionId: "up",
+      destCode: "TSW",
+      destNameEn: "Tsuen Wan",
+      destNameZh: "荃灣",
+      isViaRacecourse: false,
+    });
+
+    expect(result.destination).toBe("Tsuen Wan");
+    expect(result.destinationZh).toBe("荃灣");
+  });
+
+  it("falls back to destCode when station names are undefined", () => {
+    const result = getDestinationText({
+      serviceId: "TWL",
+      stopId: "CEN",
+      directionId: "up",
+      destCode: "UNKNOWN",
+      destNameEn: undefined,
+      destNameZh: undefined,
+      isViaRacecourse: false,
+    });
+
+    expect(result.destination).toBe("UNKNOWN");
+    expect(result.destinationZh).toBe("UNKNOWN");
+  });
+
+  it("appends 'via Racecourse' for EAL racecourse route", () => {
+    const result = getDestinationText({
+      serviceId: "EAL",
+      stopId: "HUH",
+      directionId: "up",
+      destCode: "LOW",
+      destNameEn: "Lo Wu",
+      destNameZh: "羅湖",
+      isViaRacecourse: true,
+    });
+
+    expect(result.destination).toBe("Lo Wu via Racecourse");
+    expect(result.destinationZh).toBe("羅湖 經馬場");
+  });
+
+  describe("AEL special case", () => {
+    it("shows 'Airport & AsiaWorld-Expo' for AEL UP from HOK to AWE", () => {
+      const result = getDestinationText({
+        serviceId: "AEL",
+        stopId: "HOK",
+        directionId: "up",
+        destCode: "AWE",
+        destNameEn: "AsiaWorld-Expo",
+        destNameZh: "博覽館",
+        isViaRacecourse: false,
+      });
+
+      expect(result.destination).toBe("Airport & AsiaWorld-Expo");
+      expect(result.destinationZh).toBe("機場及博覽館");
+    });
+
+    it("shows 'Airport & AsiaWorld-Expo' for AEL UP from KOW to AWE", () => {
+      const result = getDestinationText({
+        serviceId: "AEL",
+        stopId: "KOW",
+        directionId: "up",
+        destCode: "AWE",
+        destNameEn: "AsiaWorld-Expo",
+        destNameZh: "博覽館",
+        isViaRacecourse: false,
+      });
+
+      expect(result.destination).toBe("Airport & AsiaWorld-Expo");
+      expect(result.destinationZh).toBe("機場及博覽館");
+    });
+
+    it("shows 'Airport & AsiaWorld-Expo' for AEL UP from TSY to AWE", () => {
+      const result = getDestinationText({
+        serviceId: "AEL",
+        stopId: "TSY",
+        directionId: "up",
+        destCode: "AWE",
+        destNameEn: "AsiaWorld-Expo",
+        destNameZh: "博覽館",
+        isViaRacecourse: false,
+      });
+
+      expect(result.destination).toBe("Airport & AsiaWorld-Expo");
+      expect(result.destinationZh).toBe("機場及博覽館");
+    });
+
+    it("shows original destination for AEL UP from HOK to AIR (Airport)", () => {
+      const result = getDestinationText({
+        serviceId: "AEL",
+        stopId: "HOK",
+        directionId: "up",
+        destCode: "AIR",
+        destNameEn: "Airport",
+        destNameZh: "機場",
+        isViaRacecourse: false,
+      });
+
+      expect(result.destination).toBe("Airport");
+      expect(result.destinationZh).toBe("機場");
+    });
+
+    it("shows original destination for AEL UP from AIR to AWE (not city station)", () => {
+      const result = getDestinationText({
+        serviceId: "AEL",
+        stopId: "AIR",
+        directionId: "up",
+        destCode: "AWE",
+        destNameEn: "AsiaWorld-Expo",
+        destNameZh: "博覽館",
+        isViaRacecourse: false,
+      });
+
+      expect(result.destination).toBe("AsiaWorld-Expo");
+      expect(result.destinationZh).toBe("博覽館");
+    });
+
+    it("shows original destination for AEL DOWN direction", () => {
+      const result = getDestinationText({
+        serviceId: "AEL",
+        stopId: "HOK",
+        directionId: "down",
+        destCode: "AWE",
+        destNameEn: "AsiaWorld-Expo",
+        destNameZh: "博覽館",
+        isViaRacecourse: false,
+      });
+
+      expect(result.destination).toBe("AsiaWorld-Expo");
+      expect(result.destinationZh).toBe("博覽館");
+    });
   });
 });
 

@@ -6,11 +6,12 @@
  * Strictly follows MTR station screen design
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { BoardState } from "../../../models";
 import type { BoardLayoutConfig } from "../../../config";
 import type { Language } from "@/types/language";
 import { MTR_LAYOUT, MTR_TIMING } from "@/utils/styles";
+import { getMtrDirectionEntry } from "@/data/mtr";
 import { MTRHeader } from "./MTRHeader";
 import { MTRArrivalRow } from "./MTRArrivalRow";
 import { MTREmptyState } from "./MTREmptyState";
@@ -33,6 +34,16 @@ export function MTRBoard({ boardState, layout = {} }: MTRBoardProps) {
 
     return () => clearInterval(timer);
   }, []);
+
+  // Check if current station is a departure station (first station of the direction)
+  const isDepartureStation = useMemo(() => {
+    const directionEntry = getMtrDirectionEntry(
+      boardState.service.id,
+      boardState.direction ?? ""
+    );
+    if (!directionEntry) return false;
+    return directionEntry.startTermini.includes(boardState.station.id);
+  }, [boardState.service.id, boardState.direction, boardState.station.id]);
 
   const config: BoardLayoutConfig = {
     rows: layout.rows ?? MTR_LAYOUT.rowCount,
@@ -59,6 +70,7 @@ export function MTRBoard({ boardState, layout = {} }: MTRBoardProps) {
           index={index}
           lineColor={boardState.service.color}
           language={language}
+          isDepartureStation={isDepartureStation}
         />
       ))}
 
