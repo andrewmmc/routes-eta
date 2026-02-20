@@ -223,6 +223,18 @@ export default function HomePage() {
           <p className="mt-6 text-center text-xs text-gray-500">
             <Disclaimer />
           </p>
+
+          {/* GitHub Link */}
+          <p className="mt-3 text-center text-xs text-gray-500">
+            <a
+              href="https://github.com/andrewmmc/routes-eta"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-gray-700"
+            >
+              GitHub
+            </a>
+          </p>
         </div>
       </div>
     </>
