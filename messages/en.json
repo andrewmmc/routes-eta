@@ -8,6 +8,7 @@
     "title": "Hong Kong Transport ETA Simulator",
     "subtitle": "Hong Kong Transport Arrival Board Display",
     "selectBoard": "Select Board",
+    "operator": "Operator",
     "line": "Line",
     "direction": "Direction",
     "station": "Station",

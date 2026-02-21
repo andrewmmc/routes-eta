@@ -1,23 +1,21 @@
 /**
  * Home Page
  *
- * Landing page with MTR line/station/direction selector
+ * Landing page with transport operator tabs and selectors
  */
 
-import { useMemo, useCallback } from "react";
+import { useCallback } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
-import {
-  MTR_LINES,
-  MTR_LINE_DIRECTIONS,
-  getMtrLineDirections,
-  getDirectionLabel,
-  type MtrDirectionEntry,
-  type MtrStationEntry,
-} from "../data/mtr";
+import Link from "next/link";
 import { useTranslation } from "@/hooks/useTranslation";
-import { getLocalizedName } from "@/utils/localization";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import {
+  OperatorTabs,
+  MTRSelector,
+  getMtrButtonColor,
+} from "@/components/home";
+import { DEFAULT_OPERATOR, type OperatorId } from "@/models/operator";
 
 function Disclaimer() {
   const { t } = useTranslation();
@@ -40,56 +38,52 @@ function Disclaimer() {
   );
 }
 
-const LINE_ORDER = [
-  "AEL",
-  "DRL",
-  "EAL",
-  "ISL",
-  "KTL",
-  "SIL",
-  "TCL",
-  "TKL",
-  "TML",
-  "TWL",
-];
-
 export default function HomePage() {
   const router = useRouter();
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
 
   // Read state directly from URL params
+  const selectedOperator =
+    (router.query.operator as OperatorId) || DEFAULT_OPERATOR;
   const selectedLine = (router.query.line as string) || "";
   const selectedDirection = (router.query.direction as string) || "";
   const selectedStation = (router.query.station as string) || "";
 
-  const directions = useMemo<MtrDirectionEntry[]>(() => {
-    if (!selectedLine) return [];
-    return getMtrLineDirections(selectedLine);
-  }, [selectedLine]);
-
-  const stations = useMemo<MtrStationEntry[]>(() => {
-    if (!selectedLine || !selectedDirection) return [];
-    const entry = MTR_LINE_DIRECTIONS.find(
-      (d) => d.lineCode === selectedLine && d.urlDirection === selectedDirection
-    );
-    return entry?.stations ?? [];
-  }, [selectedLine, selectedDirection]);
-
-  const canNavigate = selectedLine && selectedDirection && selectedStation;
-
-  const boardUrl = canNavigate
-    ? `/board/mtr/${selectedLine}/${selectedStation}/${selectedDirection}`
-    : null;
+  const { canNavigate, boardUrl, buttonColor } = (() => {
+    switch (selectedOperator) {
+      case "mtr":
+        return {
+          canNavigate: !!(selectedLine && selectedDirection && selectedStation),
+          boardUrl:
+            selectedLine && selectedDirection && selectedStation
+              ? `/board/mtr/${selectedLine}/${selectedStation}/${selectedDirection}`
+              : null,
+          buttonColor: getMtrButtonColor(selectedLine),
+        };
+      default:
+        return { canNavigate: false, boardUrl: null, buttonColor: undefined };
+    }
+  })();
 
   // Update URL params
   const updateUrlParams = useCallback(
-    (params: { line?: string; direction?: string; station?: string }) => {
+    (params: {
+      operator?: OperatorId;
+      line?: string;
+      direction?: string;
+      station?: string;
+    }) => {
       const query: Record<string, string> = {};
+      const newOperator =
+        params.operator !== undefined ? params.operator : selectedOperator;
       const newLine = params.line !== undefined ? params.line : selectedLine;
       const newDirection =
         params.direction !== undefined ? params.direction : selectedDirection;
       const newStation =
         params.station !== undefined ? params.station : selectedStation;
+
+      // Always include operator in URL
+      query.operator = newOperator;
 
       if (newLine) query.line = newLine;
       if (newDirection) query.direction = newDirection;
@@ -97,24 +91,28 @@ export default function HomePage() {
 
       router.replace({ pathname: "/", query }, undefined, { shallow: true });
     },
-    [router, selectedLine, selectedDirection, selectedStation]
+    [router, selectedOperator, selectedLine, selectedDirection, selectedStation]
   );
+
+  function handleOperatorChange(operator: OperatorId) {
+    // Don't do anything if clicking the same operator
+    if (operator === selectedOperator) return;
+
+    // Reset all selections when changing operator
+    updateUrlParams({
+      operator,
+      line: "",
+      direction: "",
+      station: "",
+    });
+  }
 
   function handleLineChange(lineCode: string) {
     updateUrlParams({ line: lineCode, direction: "", station: "" });
   }
 
-  function handleDirectionChange(dir: string) {
-    // Keep the selected station if it also exists in the new direction
-    const newEntry = MTR_LINE_DIRECTIONS.find(
-      (d) => d.lineCode === selectedLine && d.urlDirection === dir
-    );
-    const codesInNewDir = newEntry?.stations.map((s) => s.code) ?? [];
-    if (!codesInNewDir.includes(selectedStation)) {
-      updateUrlParams({ direction: dir, station: "" });
-    } else {
-      updateUrlParams({ direction: dir });
-    }
+  function handleDirectionChange(dir: string, resetStation: boolean = true) {
+    updateUrlParams({ direction: dir, station: resetStation ? "" : undefined });
   }
 
   function handleStationChange(stationCode: string) {
@@ -125,8 +123,6 @@ export default function HomePage() {
     if (boardUrl) router.push(boardUrl);
   }
 
-  const selectedLineInfo = selectedLine ? MTR_LINES[selectedLine] : null;
-
   return (
     <>
       <Head>
@@ -136,8 +132,8 @@ export default function HomePage() {
         <div className="mx-auto max-w-2xl">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex-1" />
-            <h1 className="flex-[2] text-center text-3xl font-bold">
-              {t("home.title")}
+            <h1 className="flex-[2] cursor-pointer text-center text-3xl font-bold hover:text-blue-600">
+              <Link href="/">{t("home.title")}</Link>
             </h1>
             <div className="flex flex-1 justify-end">
               <LanguageSelector />
@@ -151,82 +147,43 @@ export default function HomePage() {
               {t("home.selectBoard")}
             </h2>
 
-            {/* Line selector */}
-            <div className="mb-4">
-              <label className="mb-1 block text-sm font-medium text-gray-700">
-                {t("home.line")}
-              </label>
-              <select
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                value={selectedLine}
-                onChange={(e) => handleLineChange(e.target.value)}
-              >
-                <option value="">{t("home.selectLine")}</option>
-                {LINE_ORDER.map((code) => {
-                  const line = MTR_LINES[code];
-                  if (!line) return null;
+            {/* Operator Tabs */}
+            <OperatorTabs
+              selectedOperator={selectedOperator}
+              onOperatorChange={handleOperatorChange}
+            />
+
+            {/* Operator Selector */}
+            {(() => {
+              switch (selectedOperator) {
+                case "mtr":
                   return (
-                    <option key={code} value={code}>
-                      {getLocalizedName(
-                        { name: line.nameEn, nameZh: line.nameZh },
-                        language
-                      )}
-                    </option>
+                    <MTRSelector
+                      selectedLine={selectedLine}
+                      selectedDirection={selectedDirection}
+                      selectedStation={selectedStation}
+                      onLineChange={handleLineChange}
+                      onDirectionChange={handleDirectionChange}
+                      onStationChange={handleStationChange}
+                    />
                   );
-                })}
-              </select>
-            </div>
-
-            {/* Direction selector */}
-            <div className="mb-4">
-              <label className="mb-1 block text-sm font-medium text-gray-700">
-                {t("home.direction")}
-              </label>
-              <select
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
-                value={selectedDirection}
-                onChange={(e) => handleDirectionChange(e.target.value)}
-                disabled={!selectedLine}
-              >
-                <option value="">{t("home.selectDirection")}</option>
-                {directions.map((d) => (
-                  <option key={d.urlDirection} value={d.urlDirection}>
-                    {getDirectionLabel(d, language)}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Station selector */}
-            <div className="mb-6">
-              <label className="mb-1 block text-sm font-medium text-gray-700">
-                {t("home.station")}
-              </label>
-              <select
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
-                value={selectedStation}
-                onChange={(e) => handleStationChange(e.target.value)}
-                disabled={!selectedDirection}
-              >
-                <option value="">{t("home.selectStation")}</option>
-                {stations.map((s) => (
-                  <option key={s.code} value={s.code}>
-                    {getLocalizedName(
-                      { name: s.nameEn, nameZh: s.nameZh },
-                      language
-                    )}
-                  </option>
-                ))}
-              </select>
-            </div>
+                default:
+                  return (
+                    <p className="text-gray-500">
+                      Operator &quot;{selectedOperator}&quot; is not yet
+                      implemented.
+                    </p>
+                  );
+              }
+            })()}
 
             {/* Go button */}
             <button
               onClick={handleGo}
               disabled={!canNavigate}
               style={
-                canNavigate && selectedLineInfo
-                  ? { backgroundColor: selectedLineInfo.color }
+                canNavigate && buttonColor
+                  ? { backgroundColor: buttonColor }
                   : undefined
               }
               className="w-full rounded-md px-4 py-2 text-sm font-medium text-white transition hover:brightness-90 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"

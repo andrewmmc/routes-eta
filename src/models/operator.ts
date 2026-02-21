@@ -20,3 +20,11 @@ export const OPERATORS: Record<OperatorId, Operator> = {
     nameZh: "港鐵",
   },
 };
+
+// Order of operators to display in UI
+export const OPERATOR_ORDER: OperatorId[] = Object.keys(
+  OPERATORS
+) as OperatorId[];
+
+// Default operator (first in order)
+export const DEFAULT_OPERATOR: OperatorId = OPERATOR_ORDER[0] || "mtr";
