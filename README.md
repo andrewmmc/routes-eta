@@ -1,6 +1,6 @@
-# Hong Kong Transport ETA Simulator
+# Hong Kong Transport ETA
 
-Hong Kong transport arrival display UI (MTR station screen style) with an extensible architecture that supports multiple transport operators through an adapter pattern.
+Hong Kong transport arrival display UI with an extensible architecture that supports multiple transport operators through an adapter pattern. Features a transit-themed design system with MTR station screen style boards.
 
 **Live Demo**: [https://eta.mmc.dev](https://eta.mmc.dev)
 
@@ -8,10 +8,11 @@ Hong Kong transport arrival display UI (MTR station screen style) with an extens
 
 ## Tech Stack
 
-- **Framework**: Next.js (Page Router) + TypeScript
-- **Styling**: Tailwind CSS
+- **Framework**: Next.js 16 (Page Router) + TypeScript
+- **Styling**: Tailwind CSS v4
 - **Data Fetching**: SWR
 - **Schema Validation**: Zod
+- **Internationalization**: next-intl
 - **Data Source**: DATA.GOV.HK APIs
 
 ## Development
@@ -24,6 +25,16 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000) to see the app.
 
 ## Usage
+
+### Home Page
+
+The home page provides an intuitive selector interface:
+
+- **Operator Tabs**: Switch between transport operators (MTR currently supported, more coming)
+- **Line Selector**: Choose the MTR line
+- **Direction Selector**: Choose travel direction (displays termini with "/" for branch lines)
+- **Station Selector**: Choose your station
+- **URL Persistence**: All selections are saved in URL params for sharing
 
 ### Sample Boards
 
@@ -42,7 +53,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 ## Architecture
 
 ```
-External API → Adapter → BoardState (unified model) → UI Components
+External API → Adapter → BoardState (unified model) → Skin Config → UI Components
 ```
 
 The UI does not directly consume external API data. Each transport operator has an adapter that:
@@ -52,6 +63,17 @@ The UI does not directly consume external API data. Each transport operator has 
 3. Declares supported capabilities (platform, crowding, etc.)
 
 This allows adding new operators without modifying UI components.
+
+### Skin System
+
+Each operator can have a custom skin (UI theme) with dedicated board and loading components:
+
+| Skin ID   | Description                                              |
+| --------- | -------------------------------------------------------- |
+| `mtr`     | MTR station screen style with line colors, platform info |
+| `default` | Generic board layout for other operators                 |
+
+Skins are configured in `src/config/skin-configs.ts` and mapped by operator ID.
 
 ### Adapter Capabilities
 
@@ -101,16 +123,34 @@ npm run generate:mtr
 
 ## Features
 
+### Core
+
 - Real-time MTR arrival data from DATA.GOV.HK API
-- MTR station screen style UI with line colors
+- Transit-themed design system with MTR station screen style
+- Bilingual support (English/Traditional Chinese) with auto-toggle on boards
 - Platform information display
 - Support for branch lines (East Rail Line to Lok Ma Chau/Lo Wu, Tseung Kwan O Line to LOHAS Park/Po Lam)
 - Racecourse route indication for East Rail Line
-- Arrival/Departing status indicators
-- Train delay status display
-- ETAs greater than 60 minutes are hidden for cleaner display
 
-## Status
+### Status Indicators
+
+- **Arriving** - Train arriving at platform
+- **Departing** - Train departing from current station
+- **Delayed** - Train running behind schedule
+
+### Arrival Display
+
+- ETA countdown with ceiling-based rounding (e.g., 2 min 1 sec → 3 min)
+- Train arrivals up to 99 minutes displayed
+- Graceful handling of API errors and missing data
+
+### Extensibility
+
+- Operator tabs ready for future bus/ferry support
+- Skin system for custom board layouts per operator
+- URL parameter persistence for shareable board links
+
+## Roadmap
 
 - **MTR**: Fully functional with real-time DATA.GOV.HK API integration
 - **KMB, Citybus, Ferry**: Planned for future release

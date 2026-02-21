@@ -18,7 +18,7 @@ npm run generate:mtr   # Regenerate src/data/mtr-directions.generated.ts from CS
 
 ## Architecture
 
-This is a Hong Kong transport arrival display UI (MTR station screen style) built with Next.js Page Router, TypeScript, Tailwind CSS, SWR, Zod, and next-intl.
+This is a Hong Kong transport arrival display UI (MTR station screen style) built with Next.js Page Router, TypeScript, Tailwind CSS 4, SWR, Zod, and next-intl.
 
 ### Deployment: GitHub Pages (Static Export)
 
@@ -86,6 +86,35 @@ interface AdapterCapabilities {
 }
 ```
 
+### Skin System
+
+Boards use a skin system to render operator-specific UIs:
+
+```
+operatorId → adapter.capabilities.hasCustomUI → skinId → SkinConfig
+```
+
+**SkinConfig** (`src/config/skin-configs.ts`):
+
+```typescript
+interface SkinConfig {
+  id: SkinId;
+  Board: ComponentType<BoardDataProps>; // Data-loaded board component
+  LoadingBoard: ComponentType<BoardProps>; // Loading skeleton
+}
+```
+
+Available skins:
+
+- `mtr` — MTR-specific board with authentic styling
+- `default` — Generic board for other operators
+
+To add a new skin:
+
+1. Create board components in `src/components/board/{skin}/`
+2. Add entry to `SKIN_CONFIGS` in `src/config/skin-configs.ts`
+3. Update skin selection logic in `src/pages/board/[...params].tsx`
+
 ### Routing
 
 Board URLs follow the pattern:
@@ -99,7 +128,7 @@ Examples:
 - `/board/mtr/TWL/CEN/down` — Tsuen Wan Line at Central (downbound)
 - `/board/mtr/EAL/LOW/up` — East Rail Line at Lo Wu
 
-The board page (`src/pages/board/[...params].tsx`) renders `MTRBoard` for MTR and the generic `BoardScreen` for other operators.
+The board page (`src/pages/board/[...params].tsx`) selects the appropriate skin based on adapter capabilities and renders the corresponding `Board` component.
 
 ### Data Flow
 
@@ -119,30 +148,58 @@ The board page (`src/pages/board/[...params].tsx`) renders `MTRBoard` for MTR an
 
 ### Static MTR Data
 
-- `src/data/mtr.ts` — MTR line definitions (10 lines: AEL, DRL, EAL, ISL, KTL, SIL, TCL, TKL, TML, TWL), helpers: `getMtrLineDirections()`, `getMtrStationInfo()`, `getMtrDirectionEntry()`
+- `src/data/mtr.ts` — MTR line definitions (10 lines: AEL, DRL, EAL, ISL, KTL, SIL, TCL, TKL, TML, TWL), helpers: `getMtrLineDirections()`, `getMtrStationInfo()`, `getMtrDirectionEntry()`, `validateMtrRouteParams()`
 - `src/data/mtr-directions.generated.ts` — Auto-generated from `assets/mtr_lines_and_stations.csv`; **do not edit manually**. Regenerate with `npm run generate:mtr`
+
+### MTR Constants
+
+- `src/constants/mtr-theme.ts` — Color palette (`MTR_COLORS`), layout (`MTR_LAYOUT`), timing (`MTR_TIMING`) constants
+- `src/constants/mtr-labels.ts` — Localized text labels (`MTR_LABELS`) for arriving, departing, minutes, no schedule
 
 ### Key Directories
 
-| Path                          | Description                                                                          |
-| ----------------------------- | ------------------------------------------------------------------------------------ |
-| `src/adapters/`               | Adapter implementations + registry + base interfaces                                 |
-| `src/models/`                 | TypeScript domain model interfaces (Operator, Station, Service, Arrival, BoardState) |
-| `src/hooks/`                  | `useBoardData` (SWR), `useTranslation`                                               |
-| `src/components/board/`       | Generic board UI components (BoardScreen, BoardHeader, ArrivalRow, BoardFooter)      |
-| `src/components/board/mtr/`   | MTR-specific skin (MTRBoard, MTRHeader, MTRArrivalRow, MTREmptyState)                |
-| `src/components/ui/`          | Shared UI (LoadingBoard, LoadingSpinner, ErrorDisplay)                               |
-| `src/lib/api.ts`              | `apiFetch`, `formatETA`, `formatCountdown`                                           |
-| `src/config/board-configs.ts` | Board layout config (currently all generated dynamically)                            |
-| `src/utils/localization.ts`   | `getLocalizedName`, `formatLocalizedTime`                                            |
-| `src/schemas/`                | Zod validation schemas                                                               |
-| `src/pages/`                  | Next.js Page Router pages (`/`, `/board/[...params]`)                                |
-| `messages/`                   | i18n strings (en.json, zh.json)                                                      |
-| `scripts/`                    | Code generation scripts                                                              |
+| Path                            | Description                                                                               |
+| ------------------------------- | ----------------------------------------------------------------------------------------- |
+| `src/adapters/`                 | Adapter implementations + registry + base interfaces                                      |
+| `src/models/`                   | TypeScript domain model interfaces (Operator, Station, Service, Arrival, BoardState)      |
+| `src/hooks/`                    | `useBoardData` (SWR), `useTranslation`                                                    |
+| `src/components/board/mtr/`     | MTR-specific skin (MTRBoard, MTRHeader, MTRArrivalRow, MTREmptyState, MTRLoadingBoard)    |
+| `src/components/board/default/` | Generic board UI (BoardScreen, BoardHeader, ArrivalRow, BoardFooter, DefaultLoadingBoard) |
+| `src/components/home/`          | Home page components (OperatorTabs, MTRSelector)                                          |
+| `src/components/ui/`            | Shared UI (ErrorDisplay)                                                                  |
+| `src/constants/`                | MTR theme and label constants (mtr-theme.ts, mtr-labels.ts)                               |
+| `src/config/`                   | Board configs and skin configs (board-configs.ts, skin-configs.ts)                        |
+| `src/utils/`                    | Utilities (localization, styles, validation)                                              |
+| `src/data/`                     | Static MTR data and generated directions                                                  |
+| `src/pages/`                    | Next.js Page Router pages (`/`, `/board/[...params]`, `/404`)                             |
+| `messages/`                     | i18n strings (en.json, zh.json)                                                           |
+| `scripts/`                      | Code generation scripts                                                                   |
+
+### Design System
+
+The project uses a transit-themed design system defined in `src/styles/globals.css`:
+
+- **Colors**: `--transit-surface`, `--transit-border`, `--transit-muted`, `--transit-accent`
+- **Fonts**:
+  - `--font-heading`: "Oswald" (headings)
+  - `--font-code`: "IBM Plex Mono" (body/code)
+  - `--font-mtr-chinese`: "Noto Serif TC" (MTR Chinese text)
+  - `--font-mtr-english`: Myriad Pro fallbacks (MTR English text)
+
+### Home Page
+
+The home page (`src/pages/index.tsx`) provides:
+
+- Operator tabs for switching between transport operators
+- MTR line/direction/station selectors via `MTRSelector` component
+- URL params persistence (`?operator=mtr&line=TWL&direction=down&station=CEN`)
+- Dynamic "Go" button with line color styling
 
 ### Current Status
 
 - MTR adapter: **fully implemented** with real DATA.GOV.HK API (`https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php`)
+- Skin system: MTR and default skins implemented
+- Home page: Operator tabs with URL params support
 - KMB, Citybus, Ferry adapters: not yet implemented
 - Weather display in MTR header: placeholder only (shows `--°C`)
 - Board configs (`BOARD_CONFIGS`): empty; all configs generated dynamically via `getBoardConfigFromParams()`
@@ -151,12 +208,13 @@ The board page (`src/pages/board/[...params].tsx`) renders `MTRBoard` for MTR an
 
 Tests are co-located with source files (`*.test.ts`). Run with `npm run test`.
 
-Key test files:
+Test files:
 
 - `src/adapters/mtr.test.ts` — MTR adapter (parseHktTime, toApiDirection, deriveStatus, mapToBoardState)
 - `src/adapters/index.test.ts` — Adapter registry
-- `src/lib/api.test.ts` — formatETA, formatCountdown
 - `src/hooks/useBoardData.test.ts` — filterByMaxEta, MAX_ETA_MS
 - `src/data/mtr.test.ts` — MTR static data helpers
 - `src/config/board-configs.test.ts` — Board config helpers
 - `src/utils/localization.test.ts` — Localization utilities
+- `src/components/board/default/ArrivalRow.test.ts` — Arrival row component
+- `scripts/generate-mtr-data.test.ts` — MTR data generation script
