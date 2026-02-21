@@ -2,10 +2,6 @@
  * ArrivalRow Component
  *
  * Displays a single arrival entry in the board
- *
- * TODO: Style to match MTR station screen design
- * TODO: Add animation for arriving trains
- * TODO: Add crowding indicator visuals
  */
 
 import type { Arrival } from "../../../models";
@@ -27,72 +23,95 @@ export function ArrivalRow({
 }: ArrivalRowProps) {
   const { t, language } = useTranslation();
 
-  // TODO: Add proper styling with Tailwind
-  // TODO: Add color coding based on crowding level
-  // TODO: Add platform highlight
-
   const destinationName = getLocalizedName(
     { name: arrival.destination ?? "", nameZh: arrival.destinationZh },
     language
   );
 
+  const etaText = formatETA(arrival.eta);
+  const isArriving =
+    arrival.status === "Arrived" ||
+    arrival.status === "Arriving" ||
+    etaText === "Arr";
+
   return (
-    <div className="flex items-center justify-between border-b border-gray-200 py-3">
+    <div className="flex items-center gap-4 py-4 border-b border-transit-border last:border-0">
       {/* Platform */}
       {showPlatform && arrival.platform && (
-        <div className="w-16 text-center">
-          <span className="text-2xl font-bold">{arrival.platform}</span>
+        <div className="w-10 h-10 flex items-center justify-center bg-transit-border shrink-0">
+          <span className="font-heading text-xl font-semibold leading-none">
+            {arrival.platform}
+          </span>
         </div>
       )}
 
       {/* Destination */}
-      <div className="flex-1">
-        <div className="text-lg font-semibold">{destinationName}</div>
+      <div className="flex-1 min-w-0">
+        <p className="font-heading text-xl font-medium uppercase tracking-wide truncate leading-tight">
+          {destinationName}
+        </p>
         {arrival.status && (
-          <div className="text-sm text-gray-500">{arrival.status}</div>
+          <p className="text-sm font-code text-transit-muted mt-0.5 tracking-wide">
+            {arrival.status}
+          </p>
         )}
       </div>
 
       {/* Train Length */}
       {showTrainLength && arrival.trainLength && (
-        <div className="mx-4 text-sm text-gray-400">
-          {arrival.trainLength} {t("board.cars")}
+        <div className="text-sm font-code text-transit-muted text-center leading-tight shrink-0">
+          <span className="block text-sm font-medium text-foreground">
+            {arrival.trainLength}
+          </span>
+          {t("board.cars")}
         </div>
       )}
 
       {/* Crowding */}
       {showCrowding && arrival.crowding && (
-        <div className="mx-4">
+        <div className="shrink-0">
           <CrowdingIndicator level={arrival.crowding} />
         </div>
       )}
 
       {/* ETA */}
-      <div className="w-24 text-right text-2xl font-bold">
-        {formatETA(arrival.eta)}
+      <div className="w-20 text-right shrink-0">
+        <span
+          className={`font-code text-2xl font-medium tabular-nums ${
+            isArriving ? "text-transit-accent" : "text-foreground"
+          }`}
+        >
+          {etaText}
+        </span>
       </div>
     </div>
   );
 }
 
-/**
- * Crowding Indicator Component
- *
- * TODO: Add proper visual design
- */
 function CrowdingIndicator({ level }: { level: string }) {
-  // TODO: Use colors matching MTR style
+  const bars = {
+    low: 1,
+    medium: 2,
+    high: 3,
+  };
   const colors = {
     low: "bg-green-500",
     medium: "bg-yellow-500",
     high: "bg-red-500",
   };
+  const activeCount = bars[level as keyof typeof bars] ?? 1;
+  const activeColor = colors[level as keyof typeof colors] ?? "bg-gray-400";
 
   return (
-    <div
-      className={`h-4 w-4 rounded-full ${colors[level as keyof typeof colors] || "bg-gray-300"}`}
-      title={`Crowding: ${level}`}
-    />
+    <div className="flex items-end gap-0.5" title={`Crowding: ${level}`}>
+      {[1, 2, 3].map((i) => (
+        <div
+          key={i}
+          className={`w-1.5 ${i <= activeCount ? activeColor : "bg-transit-border"}`}
+          style={{ height: `${i * 5 + 4}px` }}
+        />
+      ))}
+    </div>
   );
 }
 

@@ -28,7 +28,7 @@ function Disclaimer() {
             href="https://data.gov.hk"
             target="_blank"
             rel="noopener noreferrer"
-            className="underline hover:text-gray-700"
+            className="underline hover:text-foreground transition-colors"
           >
             {chunks}
           </a>
@@ -42,7 +42,6 @@ export default function HomePage() {
   const router = useRouter();
   const { t } = useTranslation();
 
-  // Read state directly from URL params
   const selectedOperator =
     (router.query.operator as OperatorId) || DEFAULT_OPERATOR;
   const selectedLine = (router.query.line as string) || "";
@@ -65,7 +64,6 @@ export default function HomePage() {
     }
   })();
 
-  // Update URL params
   const updateUrlParams = useCallback(
     (params: {
       operator?: OperatorId;
@@ -82,9 +80,7 @@ export default function HomePage() {
       const newStation =
         params.station !== undefined ? params.station : selectedStation;
 
-      // Always include operator in URL
       query.operator = newOperator;
-
       if (newLine) query.line = newLine;
       if (newDirection) query.direction = newDirection;
       if (newStation) query.station = newStation;
@@ -95,16 +91,8 @@ export default function HomePage() {
   );
 
   function handleOperatorChange(operator: OperatorId) {
-    // Don't do anything if clicking the same operator
     if (operator === selectedOperator) return;
-
-    // Reset all selections when changing operator
-    updateUrlParams({
-      operator,
-      line: "",
-      direction: "",
-      station: "",
-    });
+    updateUrlParams({ operator, line: "", direction: "", station: "" });
   }
 
   function handleLineChange(lineCode: string) {
@@ -128,93 +116,155 @@ export default function HomePage() {
       <Head>
         <title>{t("home.title")}</title>
       </Head>
-      <div className="min-h-screen bg-gray-100 p-4">
-        <div className="mx-auto max-w-2xl">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex-1" />
-            <h1 className="flex-[2] cursor-pointer text-center text-3xl font-bold hover:text-blue-600">
-              <Link href="/">{t("home.title")}</Link>
-            </h1>
-            <div className="flex flex-1 justify-end">
-              <LanguageSelector />
+
+      <div className="min-h-screen bg-background">
+        <div className="mx-auto max-w-md px-4 py-10 flex flex-col min-h-screen">
+          {/* Top bar */}
+          <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 border-2 border-transit-accent flex items-center justify-center shrink-0">
+                <span className="text-[9px] font-code font-bold text-transit-accent leading-none">
+                  HK
+                </span>
+              </div>
+              <span className="text-sm font-code text-transit-muted tracking-widest uppercase">
+                Transit ETA
+              </span>
             </div>
+            <LanguageSelector />
           </div>
-          <p className="mb-8 text-center text-gray-600">{t("home.subtitle")}</p>
 
-          {/* Board Selector */}
-          <div className="rounded-lg bg-white p-6 shadow">
-            <h2 className="mb-5 text-xl font-semibold">
-              {t("home.selectBoard")}
-            </h2>
+          {/* Hero heading */}
+          <div className="mb-8">
+            <h1 className="font-heading text-4xl font-semibold tracking-wide text-foreground uppercase leading-tight mb-1.5">
+              <Link
+                href="/"
+                className="hover:text-transit-accent transition-colors"
+              >
+                {t("home.title")}
+              </Link>
+            </h1>
+            <p className="text-sm font-code text-transit-muted tracking-wide">
+              {t("home.subtitle")}
+            </p>
+          </div>
 
-            {/* Operator Tabs */}
-            <OperatorTabs
-              selectedOperator={selectedOperator}
-              onOperatorChange={handleOperatorChange}
+          {/* Selector card */}
+          <div className="bg-transit-surface border border-transit-border">
+            {/* Accent top bar — uses line color when selected, else accent red */}
+            <div
+              className="h-[3px] w-full transition-colors duration-300"
+              style={{
+                backgroundColor:
+                  canNavigate && buttonColor
+                    ? buttonColor
+                    : "var(--transit-accent)",
+              }}
             />
 
-            {/* Operator Selector */}
-            {(() => {
-              switch (selectedOperator) {
-                case "mtr":
-                  return (
-                    <MTRSelector
-                      selectedLine={selectedLine}
-                      selectedDirection={selectedDirection}
-                      selectedStation={selectedStation}
-                      onLineChange={handleLineChange}
-                      onDirectionChange={handleDirectionChange}
-                      onStationChange={handleStationChange}
-                    />
-                  );
-                default:
-                  return (
-                    <p className="text-gray-500">
-                      Operator &quot;{selectedOperator}&quot; is not yet
-                      implemented.
-                    </p>
-                  );
-              }
-            })()}
+            <div className="p-5 pb-6">
+              {/* Section label */}
+              <div className="flex items-center gap-2 mb-5">
+                <div
+                  className="w-1.5 h-1.5 shrink-0 transition-colors duration-300"
+                  style={{
+                    backgroundColor:
+                      canNavigate && buttonColor
+                        ? buttonColor
+                        : "var(--transit-accent)",
+                  }}
+                />
+                <span className="text-sm font-code text-transit-muted tracking-widest uppercase">
+                  {t("home.selectBoard")}
+                </span>
+              </div>
 
-            {/* Go button */}
-            <button
-              onClick={handleGo}
-              disabled={!canNavigate}
-              style={
-                canNavigate && buttonColor
-                  ? { backgroundColor: buttonColor }
-                  : undefined
-              }
-              className="w-full rounded-md px-4 py-2 text-sm font-medium text-white transition hover:brightness-90 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
-            >
-              {t("home.viewBoard")}
-            </button>
+              {/* Operator Tabs */}
+              <OperatorTabs
+                selectedOperator={selectedOperator}
+                onOperatorChange={handleOperatorChange}
+              />
 
-            {boardUrl && (
-              <p className="mt-3 text-xs text-gray-400">
-                URL:{" "}
-                <code className="rounded bg-gray-100 px-1">{boardUrl}</code>
-              </p>
-            )}
+              {/* Operator Selector */}
+              {(() => {
+                switch (selectedOperator) {
+                  case "mtr":
+                    return (
+                      <MTRSelector
+                        selectedLine={selectedLine}
+                        selectedDirection={selectedDirection}
+                        selectedStation={selectedStation}
+                        onLineChange={handleLineChange}
+                        onDirectionChange={handleDirectionChange}
+                        onStationChange={handleStationChange}
+                      />
+                    );
+                  default:
+                    return (
+                      <p className="mb-6 text-sm font-code text-transit-muted">
+                        Operator &quot;{selectedOperator}&quot; is not yet
+                        implemented.
+                      </p>
+                    );
+                }
+              })()}
+
+              {/* Go button */}
+              <button
+                onClick={handleGo}
+                disabled={!canNavigate}
+                style={
+                  canNavigate && buttonColor
+                    ? { backgroundColor: buttonColor }
+                    : undefined
+                }
+                className="w-full py-3 text-sm font-heading font-medium tracking-widest uppercase text-white transition-all duration-150 hover:brightness-110 active:brightness-90 disabled:cursor-not-allowed disabled:bg-transit-border disabled:text-transit-muted"
+              >
+                {t("home.viewBoard")}
+              </button>
+
+              {boardUrl && (
+                <p className="mt-3 flex items-center gap-1.5 text-xs font-code text-transit-muted">
+                  <span
+                    className="transition-colors duration-300"
+                    style={{
+                      color: buttonColor ?? "var(--transit-accent)",
+                    }}
+                  >
+                    ▶
+                  </span>
+                  <code
+                    className="transition-colors duration-300"
+                    style={{
+                      color: buttonColor ?? "var(--transit-accent)",
+                    }}
+                  >
+                    {boardUrl}
+                  </code>
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* Disclaimer */}
-          <p className="mt-6 text-center text-xs text-gray-500">
-            <Disclaimer />
-          </p>
+          {/* Spacer */}
+          <div className="flex-1" />
 
-          {/* GitHub Link */}
-          <p className="mt-3 text-center text-xs text-gray-500">
-            <a
-              href="https://github.com/andrewmmc/routes-eta"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-gray-700"
-            >
-              GitHub
-            </a>
-          </p>
+          {/* Footer */}
+          <div className="mt-8 pt-6 border-t border-transit-border space-y-2">
+            <p className="text-xs font-code text-transit-muted leading-relaxed">
+              <Disclaimer />
+            </p>
+            <p className="text-xs font-code text-transit-muted text-center pt-1">
+              <a
+                href="https://github.com/andrewmmc/routes-eta"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-foreground transition-colors underline underline-offset-2"
+              >
+                GitHub
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </>

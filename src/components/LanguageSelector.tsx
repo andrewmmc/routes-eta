@@ -10,7 +10,7 @@ export function LanguageSelector() {
   return (
     <button
       onClick={toggleLanguage}
-      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+      className="border border-transit-border-strong px-3 py-1.5 text-sm font-code text-transit-muted tracking-wider uppercase hover:border-transit-accent hover:text-transit-accent transition-colors duration-150 cursor-pointer"
       aria-label="Toggle language"
     >
       {language === "en" ? "中文" : "EN"}

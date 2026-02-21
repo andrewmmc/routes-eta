@@ -2,11 +2,6 @@
  * BoardScreen Component
  *
  * Main component that renders the complete arrival board display
- * MTR station screen style UI
- *
- * TODO: Implement actual MTR screen styling
- * TODO: Add responsive layout
- * TODO: Add full-screen mode support
  */
 
 import type { BoardState } from "../../../models";
@@ -24,7 +19,6 @@ export interface BoardScreenProps {
 export function BoardScreen({ boardState, layout = {} }: BoardScreenProps) {
   const { t } = useTranslation();
 
-  // Merge default layout with provided layout
   const config: BoardLayoutConfig = {
     rows: layout.rows ?? 4,
     columns: layout.columns ?? 1,
@@ -33,51 +27,65 @@ export function BoardScreen({ boardState, layout = {} }: BoardScreenProps) {
     showTrainLength: layout.showTrainLength ?? true,
   };
 
-  // Limit arrivals to configured rows
   const displayedArrivals = boardState.arrivals.slice(0, config.rows);
+  const lineColor = boardState.service.color || "var(--transit-accent)";
 
   return (
-    <div className="mx-auto max-w-2xl rounded-lg bg-white p-6 shadow-lg">
-      {/* Header */}
-      <BoardHeader boardState={boardState} />
+    <div className="mx-auto max-w-2xl bg-transit-surface border border-transit-border">
+      {/* Line color accent top bar */}
+      <div className="h-[3px] w-full" style={{ backgroundColor: lineColor }} />
 
-      {/* Column Headers */}
-      <div className="mb-2 flex border-b border-gray-300 pb-2 text-sm text-gray-500">
-        {config.showPlatform && (
-          <div className="w-16 text-center">{t("board.platform")}</div>
-        )}
-        <div className="flex-1">{t("board.destination")}</div>
-        {config.showTrainLength && (
-          <div className="mx-4 w-12 text-center">{t("board.trainLength")}</div>
-        )}
-        {config.showCrowding && (
-          <div className="mx-4 w-8 text-center">{t("board.crowding")}</div>
-        )}
-        <div className="w-24 text-right">{t("board.arrival")}</div>
-      </div>
+      <div className="p-6">
+        {/* Header */}
+        <BoardHeader boardState={boardState} />
 
-      {/* Arrival Rows */}
-      <div className="divide-y divide-gray-100">
-        {displayedArrivals.map((arrival, index) => (
-          <ArrivalRow
-            key={index}
-            arrival={arrival}
-            showPlatform={config.showPlatform}
-            showCrowding={config.showCrowding}
-            showTrainLength={config.showTrainLength}
-          />
-        ))}
-
-        {/* Empty state */}
-        {displayedArrivals.length === 0 && (
-          <div className="py-16 text-center text-gray-400">
-            {t("board.noSchedule")}
+        {/* Column Headers */}
+        <div className="mb-1 flex gap-4 pb-2 border-b border-transit-border">
+          {config.showPlatform && (
+            <div className="w-10 text-center text-sm font-code tracking-widest uppercase text-transit-muted">
+              {t("board.platform")}
+            </div>
+          )}
+          <div className="flex-1 text-sm font-code tracking-widest uppercase text-transit-muted">
+            {t("board.destination")}
           </div>
-        )}
-      </div>
+          {config.showTrainLength && (
+            <div className="w-10 text-center text-sm font-code tracking-widest uppercase text-transit-muted">
+              {t("board.trainLength")}
+            </div>
+          )}
+          {config.showCrowding && (
+            <div className="w-10 text-center text-sm font-code tracking-widest uppercase text-transit-muted">
+              {t("board.crowding")}
+            </div>
+          )}
+          <div className="w-20 text-right text-sm font-code tracking-widest uppercase text-transit-muted">
+            {t("board.arrival")}
+          </div>
+        </div>
 
-      {/* Footer */}
-      <BoardFooter boardState={boardState} />
+        {/* Arrival Rows */}
+        <div>
+          {displayedArrivals.map((arrival, index) => (
+            <ArrivalRow
+              key={index}
+              arrival={arrival}
+              showPlatform={config.showPlatform}
+              showCrowding={config.showCrowding}
+              showTrainLength={config.showTrainLength}
+            />
+          ))}
+
+          {displayedArrivals.length === 0 && (
+            <div className="py-16 text-center font-code text-sm text-transit-muted">
+              {t("board.noSchedule")}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <BoardFooter boardState={boardState} />
+      </div>
     </div>
   );
 }

@@ -3,10 +3,6 @@
  *
  * Displays the header section of the board screen
  * Shows line name, station name, direction
- *
- * TODO: Style to match MTR station screen design
- * TODO: Add line color indicator
- * TODO: Add operator logo
  */
 
 import type { BoardState } from "../../../models";
@@ -21,8 +17,7 @@ export function BoardHeader({ boardState }: BoardHeaderProps) {
   const { operator, station, service } = boardState;
   const { t, language } = useTranslation();
 
-  // TODO: Get line color from service config
-  const lineColor = service.color || "#000000";
+  const lineColor = service.color || "var(--transit-accent)";
 
   const operatorName = getLocalizedName(operator, language);
   const serviceName = getLocalizedName(service, language);
@@ -31,27 +26,33 @@ export function BoardHeader({ boardState }: BoardHeaderProps) {
     service.direction === "up" ? t("home.up") : t("home.down");
 
   return (
-    <div className="mb-4 border-b-4 pb-4" style={{ borderColor: lineColor }}>
+    <div className="mb-5 pb-5 border-b border-transit-border">
       {/* Operator */}
-      <div className="text-sm text-gray-500">{operatorName}</div>
+      <p className="text-sm font-code tracking-widest uppercase text-transit-muted mb-2">
+        {operatorName}
+      </p>
 
       {/* Line Name */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 mb-1">
         <div
-          className="h-8 w-3 rounded"
+          className="w-1 h-10 shrink-0"
           style={{ backgroundColor: lineColor }}
         />
-        <h1 className="text-3xl font-bold">{serviceName}</h1>
+        <h1 className="font-heading text-4xl font-semibold uppercase tracking-wide leading-none">
+          {serviceName}
+        </h1>
       </div>
 
       {/* Station Name */}
-      <div className="mt-2 text-xl">{stationName}</div>
+      <p className="font-heading text-2xl font-medium uppercase tracking-wide text-foreground mt-2">
+        {stationName}
+      </p>
 
       {/* Direction */}
       {service.direction && (
-        <div className="text-sm text-gray-400">
+        <p className="text-sm font-code text-transit-muted mt-1 tracking-wide">
           {language === "zh" ? "往" : "To"} {directionLabel}
-        </div>
+        </p>
       )}
     </div>
   );

@@ -148,11 +148,11 @@ export default function BoardPage() {
       <Head>
         <title>{pageTitle}</title>
       </Head>
-      <div className="min-h-screen bg-gray-100 p-4">
-        <div className="mx-auto mb-3 max-w-2xl">
+      <div className="min-h-screen bg-background px-4 py-8">
+        <div className="mx-auto mb-4 max-w-2xl">
           <Link
             href="/"
-            className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800"
+            className="inline-flex items-center gap-1.5 text-sm font-code text-transit-muted tracking-wide hover:text-foreground transition-colors"
           >
             ← {t("nav.backToHome")}
           </Link>

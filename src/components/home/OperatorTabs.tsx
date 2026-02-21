@@ -21,10 +21,10 @@ export function OperatorTabs({
 
   return (
     <div className="mb-6">
-      <label className="mb-2 block text-sm font-medium text-gray-700">
+      <p className="mb-2 text-sm font-code tracking-widest uppercase text-transit-muted">
         {t("home.operator")}
-      </label>
-      <div className="flex gap-2">
+      </p>
+      <div className="flex border-b border-transit-border">
         {OPERATOR_ORDER.map((operatorId) => {
           const operator = OPERATORS[operatorId];
           if (!operator) return null;
@@ -35,10 +35,10 @@ export function OperatorTabs({
             <button
               key={operatorId}
               onClick={() => onOperatorChange(operatorId)}
-              className={`rounded-md px-4 py-2 text-sm font-medium transition ${
+              className={`px-4 py-2.5 text-sm font-heading tracking-wide border-b-2 -mb-px transition-colors duration-150 ${
                 isSelected
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "border-transit-accent text-foreground"
+                  : "border-transparent text-transit-muted hover:text-foreground hover:border-transit-border-strong"
               }`}
             >
               {getLocalizedName(operator, language)}

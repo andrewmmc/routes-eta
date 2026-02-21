@@ -1,13 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f6f5f1;
+  --foreground: #1a1917;
+
+  /* Transit UI Theme */
+  --transit-surface: #ffffff;
+  --transit-border: #e0ded8;
+  --transit-border-strong: #c8c5be;
+  --transit-muted: #706e68;
+  --transit-accent: #c8000f;
+  --transit-accent-bg: rgba(200, 0, 15, 0.06);
 
   /* MTR Board Fonts */
   --font-mtr-chinese: "Noto Serif TC", serif;
   --font-mtr-english:
     "Myriad Pro", "Open Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-heading: "Oswald", sans-serif;
+  --font-code: "IBM Plex Mono", monospace;
 }
 
 @theme inline {
@@ -18,12 +28,20 @@
   --font-mtr-chinese: "Noto Serif TC", serif;
   --font-mtr-english:
     "Myriad Pro", "Open Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-heading: var(--font-heading);
+  --font-code: var(--font-code);
+  --color-transit-surface: var(--transit-surface);
+  --color-transit-border: var(--transit-border);
+  --color-transit-border-strong: var(--transit-border-strong);
+  --color-transit-muted: var(--transit-muted);
+  --color-transit-accent: var(--transit-accent);
+  --color-transit-accent-bg: var(--transit-accent-bg);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "IBM Plex Mono", "Noto Serif TC", Arial, sans-serif;
   color-scheme: light;
 }
 

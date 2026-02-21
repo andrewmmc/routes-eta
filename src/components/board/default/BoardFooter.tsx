@@ -2,9 +2,6 @@
  * BoardFooter Component
  *
  * Displays footer information (last updated time, alerts)
- *
- * TODO: Add alert ticker for service disruptions
- * TODO: Add auto-refresh indicator
  */
 
 import type { BoardState } from "../../../models";
@@ -22,20 +19,22 @@ export function BoardFooter({ boardState }: BoardFooterProps) {
   const formattedTime = formatLocalizedTime(lastUpdated, language);
 
   return (
-    <div className="mt-4 border-t border-gray-200 pt-4">
+    <div className="mt-5 pt-4 border-t border-transit-border">
       {/* Alerts */}
       {alerts && alerts.length > 0 && (
-        <div className="mb-2 rounded bg-yellow-100 p-2 text-sm text-yellow-800">
+        <div className="mb-3 px-3 py-2 bg-transit-accent-bg border-l-2 border-transit-accent">
           {alerts.map((alert, index) => (
-            <div key={index}>{alert}</div>
+            <p key={index} className="text-sm font-code text-foreground">
+              {alert}
+            </p>
           ))}
         </div>
       )}
 
       {/* Last Updated */}
-      <div className="text-right text-sm text-gray-400">
+      <p className="text-right text-sm font-code text-transit-muted tracking-wide">
         {t("board.lastUpdated")}: {formattedTime}
-      </div>
+      </p>
     </div>
   );
 }
