@@ -155,36 +155,17 @@ export default function HomePage() {
             <div
               className="h-[3px] w-full transition-colors duration-300"
               style={{
-                backgroundColor:
-                  canNavigate && buttonColor
-                    ? buttonColor
-                    : "var(--transit-accent)",
+                backgroundColor: buttonColor ?? "var(--transit-accent)",
               }}
             />
 
+            {/* Operator Tabs */}
+            <OperatorTabs
+              selectedOperator={selectedOperator}
+              onOperatorChange={handleOperatorChange}
+            />
+
             <div className="p-5 pb-6">
-              {/* Section label */}
-              <div className="flex items-center gap-2 mb-5">
-                <div
-                  className="w-1.5 h-1.5 shrink-0 transition-colors duration-300"
-                  style={{
-                    backgroundColor:
-                      canNavigate && buttonColor
-                        ? buttonColor
-                        : "var(--transit-accent)",
-                  }}
-                />
-                <span className="text-sm font-code text-transit-muted tracking-widest uppercase">
-                  {t("home.selectBoard")}
-                </span>
-              </div>
-
-              {/* Operator Tabs */}
-              <OperatorTabs
-                selectedOperator={selectedOperator}
-                onOperatorChange={handleOperatorChange}
-              />
-
               {/* Operator Selector */}
               {(() => {
                 switch (selectedOperator) {

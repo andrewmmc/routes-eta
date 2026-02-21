@@ -9,8 +9,8 @@
   --transit-border: #e0ded8;
   --transit-border-strong: #c8c5be;
   --transit-muted: #706e68;
-  --transit-accent: #c8000f;
-  --transit-accent-bg: rgba(200, 0, 15, 0.06);
+  --transit-accent: #3d3c3a;
+  --transit-accent-bg: rgba(61, 60, 58, 0.06);
 
   /* MTR Board Fonts */
   --font-mtr-chinese: "Noto Serif TC", serif;
