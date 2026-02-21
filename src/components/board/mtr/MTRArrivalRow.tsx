@@ -156,13 +156,13 @@ function isArriving(eta: Date | null): boolean {
 }
 
 /**
- * Format ETA as minutes only (always rounds up)
+ * Format ETA as minutes only (rounds at 0.5)
  */
 function formatETAMinutes(eta: Date | null): string {
   if (!eta) return "";
 
   const diffMs = eta.getTime() - Date.now();
-  const diffMins = Math.ceil(diffMs / 60000);
+  const diffMins = Math.round(diffMs / 60000);
 
   if (diffMins <= 0) return "0";
 
