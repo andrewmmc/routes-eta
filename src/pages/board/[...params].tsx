@@ -130,7 +130,15 @@ export default function BoardPage() {
         <Head>
           <title>{pageTitle}</title>
         </Head>
-        <MTRBoard boardState={data} layout={config.layout} />
+        <MTRBoard
+          boardState={data}
+          layout={config.layout}
+          boardParams={{
+            line: serviceId,
+            station: stopId,
+            direction: directionId,
+          }}
+        />
       </>
     );
   }

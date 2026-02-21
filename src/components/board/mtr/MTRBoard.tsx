@@ -21,9 +21,14 @@ export type { Language } from "@/types/language";
 export interface MTRBoardProps {
   boardState: BoardState;
   layout?: Partial<BoardLayoutConfig>;
+  boardParams?: { line: string; station: string; direction: string };
 }
 
-export function MTRBoard({ boardState, layout = {} }: MTRBoardProps) {
+export function MTRBoard({
+  boardState,
+  layout = {},
+  boardParams,
+}: MTRBoardProps) {
   const [language, setLanguage] = useState<Language>("zh");
 
   // Toggle language periodically
@@ -60,7 +65,7 @@ export function MTRBoard({ boardState, layout = {} }: MTRBoardProps) {
   return (
     <div className="flex h-screen flex-col bg-white">
       {/* Top Header Bar - Weather & Time */}
-      <MTRHeader />
+      <MTRHeader boardParams={boardParams} />
 
       {/* Arrival Rows */}
       {displayedArrivals.map((arrival, index) => (

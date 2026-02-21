@@ -6,11 +6,15 @@
  * Clickable to navigate back to home page
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { MTR_COLORS, MTR_LAYOUT, MTR_TIMING } from "@/utils/styles";
 
-export function MTRHeader() {
+export interface MTRHeaderProps {
+  boardParams?: { line: string; station: string; direction: string };
+}
+
+export function MTRHeader({ boardParams }: MTRHeaderProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -27,9 +31,20 @@ export function MTRHeader() {
     hour12: false,
   });
 
+  // Construct home URL with query params to preserve selection state
+  const homeHref = useMemo(() => {
+    if (!boardParams) return "/";
+    const params = new URLSearchParams({
+      line: boardParams.line,
+      station: boardParams.station,
+      direction: boardParams.direction,
+    });
+    return `/?${params.toString()}`;
+  }, [boardParams]);
+
   return (
     <Link
-      href="/"
+      href={homeHref}
       className={`flex ${MTR_LAYOUT.headerFlex} cursor-pointer items-center justify-between ${MTR_LAYOUT.paddingX} text-white`}
       style={{ backgroundColor: MTR_COLORS.headerBg }}
     >
