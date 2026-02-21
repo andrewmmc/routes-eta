@@ -8,3 +8,4 @@ export * from "./BoardScreen";
 export * from "./BoardHeader";
 export * from "./BoardFooter";
 export * from "./ArrivalRow";
+export { DefaultLoadingBoard } from "./DefaultLoadingBoard";

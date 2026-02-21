@@ -7,3 +7,4 @@ export * from "./station";
 export * from "./service";
 export * from "./arrival";
 export * from "./board-state";
+export * from "./board-props";

@@ -19,11 +19,13 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { BoardScreen, MTRBoard } from "../../components/board";
 import { useBoardData } from "../../hooks";
-import { LoadingBoard } from "../../components/ui/LoadingSpinner";
 import { ErrorDisplay } from "../../components/ui/ErrorDisplay";
-import { getBoardConfigFromParams } from "../../config";
+import {
+  getBoardConfigFromParams,
+  getSkinConfig,
+  type SkinId,
+} from "../../config";
 import { useTranslation } from "@/hooks/useTranslation";
 import { getLocalizedName, formatLocalizedTime } from "@/utils/localization";
 import { getAdapter } from "../../adapters";
@@ -76,19 +78,38 @@ export default function BoardPage() {
     refreshInterval: 60000, // TODO: Make configurable
   });
 
+  // Determine skin based on adapter capabilities
+  let skinId: SkinId = "default";
+  try {
+    const adapter = getAdapter(operatorId as "mtr");
+    if (adapter.capabilities.hasCustomUI) {
+      // TODO: skin <> operator mapping
+      skinId = "mtr";
+    }
+  } catch {
+    // Unknown operator - fall back to default skin
+  }
+
+  const skinConfig = getSkinConfig(skinId);
+  const { Board, LoadingBoard } = skinConfig;
+
+  const loadingProps = {
+    layout: config.layout,
+  };
+
   // Wait for router to be ready
   if (!router.isReady || !params) {
-    return <LoadingBoard />;
+    return <LoadingBoard {...loadingProps} />;
   }
 
   // Show loading while validating/redirecting
   if (!operatorId || !serviceId || !stopId || !directionId) {
-    return <LoadingBoard />;
+    return <LoadingBoard {...loadingProps} />;
   }
 
   // Loading state
   if (isLoading && !data) {
-    return <LoadingBoard />;
+    return <LoadingBoard {...loadingProps} />;
   }
 
   // Error state
@@ -106,15 +127,6 @@ export default function BoardPage() {
     return <ErrorDisplay message="No data available" onRetry={refresh} />;
   }
 
-  // Render board - use custom UI if adapter supports it
-  let useCustomUI = false;
-  try {
-    const adapter = getAdapter(operatorId as "mtr");
-    useCustomUI = adapter.capabilities.hasCustomUI;
-  } catch {
-    // Unknown operator - fall back to generic UI
-  }
-
   // Format last updated for page title
   const lastUpdatedStr = formatLocalizedTime(data.lastUpdated, language);
 
@@ -124,21 +136,24 @@ export default function BoardPage() {
 
   const pageTitle = `${stationName} | ${serviceName} | ${updateLabel}: ${lastUpdatedStr}`;
 
-  if (useCustomUI) {
+  const boardProps = {
+    boardState: data,
+    layout: config.layout,
+    boardParams: {
+      line: serviceId,
+      station: stopId,
+      direction: directionId,
+    },
+  };
+
+  // Render with skin - MTR skin doesn't need back link wrapper
+  if (skinId === "mtr") {
     return (
       <>
         <Head>
           <title>{pageTitle}</title>
         </Head>
-        <MTRBoard
-          boardState={data}
-          layout={config.layout}
-          boardParams={{
-            line: serviceId,
-            station: stopId,
-            direction: directionId,
-          }}
-        />
+        <Board {...boardProps} />
       </>
     );
   }
@@ -157,7 +172,7 @@ export default function BoardPage() {
             ← {t("nav.backToHome")}
           </Link>
         </div>
-        <BoardScreen boardState={data} layout={config.layout} />
+        <Board {...boardProps} />
       </div>
     </>
   );

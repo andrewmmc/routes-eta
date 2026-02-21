@@ -9,7 +9,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/router";
-import { LoadingBoard } from "@/components/ui/LoadingSpinner";
+import { DefaultLoadingBoard } from "@/components/board";
 
 export default function Custom404() {
   const router = useRouter();
@@ -21,5 +21,5 @@ export default function Custom404() {
     router.replace(pathname + search + hash);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return <LoadingBoard />;
+  return <DefaultLoadingBoard layout={{}} />;
 }

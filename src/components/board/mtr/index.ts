@@ -7,3 +7,4 @@
 export { MTRBoard } from "./MTRBoard";
 export { MTRHeader } from "./MTRHeader";
 export { MTRArrivalRow } from "./MTRArrivalRow";
+export { MTRLoadingBoard } from "./MTRLoadingBoard";
