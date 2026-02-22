@@ -114,7 +114,7 @@ export function MTRArrivalRow({
             className="flex h-8 w-8 items-center justify-center rounded-full text-xl font-mtr-english text-white md:h-14 md:w-14 md:text-4xl lg:h-20 lg:w-20 lg:text-6xl"
             style={{ backgroundColor: lineColor }}
           >
-            <span style={{ marginTop: "4px", lineHeight: 1 }}>
+            <span className="mt-0.5 leading-none md:mt-1 lg:mt-1.5">
               {arrival.platform}
             </span>
           </div>
