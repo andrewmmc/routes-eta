@@ -30,11 +30,11 @@ export function MTREmptyState({
       {Array.from({ length: rows }).map((_, index) => (
         <div
           key={index}
-          className={`flex flex-1 items-center justify-center ${getRowBgClass(startIndex + index)}`}
+          className={`flex min-h-16 flex-1 items-center justify-center ${getRowBgClass(startIndex + index)}`}
         >
           {showMessage && index === 0 && (
             <span
-              className={`text-xl text-gray-400 md:text-3xl lg:text-4xl ${textFontClass}`}
+              className={`text-2xl text-gray-400 md:text-3xl lg:text-4xl ${textFontClass}`}
             >
               {labels.noSchedule}
             </span>

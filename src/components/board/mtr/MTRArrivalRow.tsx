@@ -75,7 +75,7 @@ export function MTRArrivalRow({
 
   return (
     <div
-      className={`flex flex-1 items-center justify-between px-4 md:px-12 lg:px-16 ${bgColor}`}
+      className={`flex min-h-16 flex-1 items-center justify-between px-4 md:px-12 lg:px-16 ${bgColor}`}
     >
       {/* Hidden elements to measure text width for both languages */}
       <span
@@ -109,9 +109,9 @@ export function MTRArrivalRow({
       {/* Right: Platform circle + ETA in separate columns */}
       <div className="flex shrink-0 items-center">
         {/* Column 1: Platform circle */}
-        <div className="flex w-12 items-center justify-center md:w-20 lg:w-28">
+        <div className="flex w-14 items-center justify-center md:w-20 lg:w-28">
           <div
-            className="flex h-8 w-8 items-center justify-center rounded-full text-xl font-mtr-english text-white md:h-14 md:w-14 md:text-4xl lg:h-20 lg:w-20 lg:text-6xl"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-2xl font-mtr-english text-white md:h-14 md:w-14 md:text-4xl lg:h-20 lg:w-20 lg:text-6xl"
             style={{ backgroundColor: lineColor }}
           >
             <span className="mt-0.5 leading-none md:mt-1 lg:mt-1.5">
@@ -121,20 +121,20 @@ export function MTRArrivalRow({
         </div>
 
         {/* Column 2: ETA */}
-        <div className="flex min-w-[100px] items-center justify-end gap-1 md:min-w-[240px] md:gap-3 lg:min-w-[320px] lg:gap-4">
+        <div className="flex min-w-[120px] items-center justify-end gap-2 md:min-w-[240px] md:gap-3 lg:min-w-[320px] lg:gap-4">
           {arrival.status === ARRIVAL_STATUS.ARRIVED ? null : isArrivingSoon ? ( // Train has arrived - leave column empty
             <span
-              className={`text-2xl text-black md:text-4xl lg:text-6xl ${textFontClass}`}
+              className={`text-xl text-black md:text-4xl lg:text-6xl ${textFontClass}`}
             >
               {isDepartureStation ? labels.departing : labels.arriving}
             </span>
           ) : (
             <>
-              <span className="text-3xl font-mtr-english text-black md:text-5xl lg:text-7xl">
+              <span className="text-4xl font-mtr-english text-black md:text-5xl lg:text-7xl">
                 {formatETAMinutes(arrival.eta)}
               </span>
               <span
-                className={`text-xl text-black md:text-3xl lg:text-5xl ${textFontClass}`}
+                className={`text-lg text-black md:text-3xl lg:text-5xl ${textFontClass}`}
               >
                 {labels.minutes}
               </span>
