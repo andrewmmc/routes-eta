@@ -188,17 +188,21 @@ export function validateMtrRouteParams(
   // Check line exists
   if (!MTR_LINES[lineCode]) return false;
 
-  // Check direction is valid (up or down)
-  if (direction !== "up" && direction !== "down") return false;
+  // If direction is provided, it must be "up" or "down"
+  if (direction !== undefined && direction !== "up" && direction !== "down") {
+    return false;
+  }
 
-  // Check station exists in the line's direction
-  const directionEntry = getMtrDirectionEntry(lineCode, direction);
-  if (!directionEntry) return false;
+  if (direction) {
+    // Check station exists in the given direction
+    const directionEntry = getMtrDirectionEntry(lineCode, direction);
+    if (!directionEntry) return false;
+    return directionEntry.stations.some((s) => s.code === stationCode);
+  }
 
-  const stationExists = directionEntry.stations.some(
-    (s) => s.code === stationCode
+  // No direction: check station exists in any direction of the line
+  const lineDirections = getMtrLineDirections(lineCode);
+  return lineDirections.some((d) =>
+    d.stations.some((s) => s.code === stationCode)
   );
-  if (!stationExists) return false;
-
-  return true;
 }

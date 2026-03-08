@@ -52,10 +52,12 @@ export default function HomePage() {
     switch (selectedOperator) {
       case "mtr":
         return {
-          canNavigate: !!(selectedLine && selectedDirection && selectedStation),
+          canNavigate: !!(selectedLine && selectedStation),
           boardUrl:
-            selectedLine && selectedDirection && selectedStation
-              ? `/board/mtr/${selectedLine}/${selectedStation}/${selectedDirection}`
+            selectedLine && selectedStation
+              ? selectedDirection
+                ? `/board/mtr/${selectedLine}/${selectedStation}/${selectedDirection}`
+                : `/board/mtr/${selectedLine}/${selectedStation}`
               : null,
           buttonColor: getMtrButtonColor(selectedLine),
         };

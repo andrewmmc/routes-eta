@@ -88,11 +88,27 @@ export function MTRSelector({
   }, [selectedLine]);
 
   const stations = useMemo<MtrStationEntry[]>(() => {
-    if (!selectedLine || !selectedDirection) return [];
-    const entry = MTR_LINE_DIRECTIONS.find(
-      (d) => d.lineCode === selectedLine && d.urlDirection === selectedDirection
-    );
-    return entry?.stations ?? [];
+    if (!selectedLine) return [];
+    if (selectedDirection) {
+      const entry = MTR_LINE_DIRECTIONS.find(
+        (d) =>
+          d.lineCode === selectedLine && d.urlDirection === selectedDirection
+      );
+      return entry?.stations ?? [];
+    }
+    // No direction selected: show all unique stations across all directions
+    const seen = new Set<string>();
+    const all: MtrStationEntry[] = [];
+    for (const entry of MTR_LINE_DIRECTIONS) {
+      if (entry.lineCode !== selectedLine) continue;
+      for (const s of entry.stations) {
+        if (!seen.has(s.code)) {
+          seen.add(s.code);
+          all.push(s);
+        }
+      }
+    }
+    return all;
   }, [selectedLine, selectedDirection]);
 
   const handleDirectionChange = useCallback(
@@ -177,7 +193,7 @@ export function MTRSelector({
             className={selectClass}
             value={selectedStation}
             onChange={(e) => onStationChange(e.target.value)}
-            disabled={!selectedDirection}
+            disabled={!selectedLine}
           >
             <option value="">{t("home.selectStation")}</option>
             {stations.map((s) => (

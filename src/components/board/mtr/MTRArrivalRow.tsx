@@ -40,6 +40,8 @@ export function MTRArrivalRow({
 
   // Determine if arriving soon (within 1 minute)
   const isArrivingSoon = isArriving(arrival.eta);
+  // Computed minutes — null when eta is null
+  const etaMinutes = getETAMinutes(arrival.eta);
 
   // Get text based on current language
   const labels = getMtrLabels(language);
@@ -122,7 +124,8 @@ export function MTRArrivalRow({
 
         {/* Column 2: ETA */}
         <div className="flex min-w-[120px] items-center justify-end gap-2 md:min-w-[240px] md:gap-3 lg:min-w-[320px] lg:gap-4">
-          {arrival.status === ARRIVAL_STATUS.ARRIVED ? null : isArrivingSoon ? ( // Train has arrived - leave column empty
+          {arrival.status === ARRIVAL_STATUS.ARRIVED ? null : isArrivingSoon ||
+            etaMinutes === 0 ? ( // Train has arrived - leave column empty
             <span
               className={`text-xl text-black md:text-4xl lg:text-6xl ${textFontClass}`}
             >
@@ -131,7 +134,7 @@ export function MTRArrivalRow({
           ) : (
             <>
               <span className="text-4xl font-mtr-english text-black md:text-5xl lg:text-7xl">
-                {formatETAMinutes(arrival.eta)}
+                {etaMinutes}
               </span>
               <span
                 className={`text-lg text-black md:text-3xl lg:text-5xl ${textFontClass}`}
@@ -156,17 +159,12 @@ function isArriving(eta: Date | null): boolean {
 }
 
 /**
- * Format ETA as minutes only (rounds at 0.5)
+ * Return ETA as whole minutes (rounds at 0.5). Returns null when eta is null.
  */
-function formatETAMinutes(eta: Date | null): string {
-  if (!eta) return "";
-
+function getETAMinutes(eta: Date | null): number | null {
+  if (!eta) return null;
   const diffMs = eta.getTime() - Date.now();
-  const diffMins = Math.round(diffMs / 60000);
-
-  if (diffMins <= 0) return "0";
-
-  return diffMins.toString();
+  return Math.round(diffMs / 60000);
 }
 
 export default MTRArrivalRow;

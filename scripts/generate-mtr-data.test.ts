@@ -4,7 +4,7 @@ import {
   parseCsv,
   buildDirections,
   generateOutput,
-} from "./generate-mtr-data.ts";
+} from "./generate-mtr-data";
 
 // ─── Minimal CSV fixtures ─────────────────────────────────────────────────────
 

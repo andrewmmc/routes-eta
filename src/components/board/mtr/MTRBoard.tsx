@@ -6,7 +6,7 @@
  * Strictly follows MTR station screen design
  */
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import type { BoardState } from "../../../models";
 import type { BoardLayoutConfig } from "../../../config";
 import type { Language } from "@/types/language";
@@ -21,7 +21,7 @@ export type { Language } from "@/types/language";
 export interface MTRBoardProps {
   boardState: BoardState;
   layout?: Partial<BoardLayoutConfig>;
-  boardParams?: { line: string; station: string; direction: string };
+  boardParams?: { line: string; station: string; direction?: string };
 }
 
 export function MTRBoard({
@@ -40,15 +40,24 @@ export function MTRBoard({
     return () => clearInterval(timer);
   }, []);
 
-  // Check if current station is a departure station (first station of the direction)
+  // Check if the current station is a departure terminus for a given direction
+  const isDepartureStationForDirection = useCallback(
+    (direction: string) => {
+      const directionEntry = getMtrDirectionEntry(
+        boardState.service.id,
+        direction
+      );
+      if (!directionEntry) return false;
+      return directionEntry.startTermini.includes(boardState.station.id);
+    },
+    [boardState.service.id, boardState.station.id]
+  );
+
+  // For single-direction boards, pre-compute isDepartureStation
   const isDepartureStation = useMemo(() => {
-    const directionEntry = getMtrDirectionEntry(
-      boardState.service.id,
-      boardState.direction ?? ""
-    );
-    if (!directionEntry) return false;
-    return directionEntry.startTermini.includes(boardState.station.id);
-  }, [boardState.service.id, boardState.direction, boardState.station.id]);
+    if (!boardState.direction) return false;
+    return isDepartureStationForDirection(boardState.direction);
+  }, [boardState.direction, isDepartureStationForDirection]);
 
   const config: BoardLayoutConfig = {
     rows: layout.rows ?? MTR_LAYOUT.rowCount,
@@ -65,7 +74,11 @@ export function MTRBoard({
   return (
     <div className="flex h-screen flex-col bg-white">
       {/* Top Header Bar - Weather & Time */}
-      <MTRHeader boardParams={boardParams} />
+      <MTRHeader
+        boardParams={boardParams}
+        service={boardState.service}
+        language={language}
+      />
 
       {/* Arrival Rows */}
       {displayedArrivals.map((arrival, index) => (
@@ -75,7 +88,11 @@ export function MTRBoard({
           index={index}
           lineColor={boardState.service.color}
           language={language}
-          isDepartureStation={isDepartureStation}
+          isDepartureStation={
+            arrival.direction
+              ? isDepartureStationForDirection(arrival.direction)
+              : isDepartureStation
+          }
         />
       ))}
 

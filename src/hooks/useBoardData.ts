@@ -9,7 +9,7 @@ import type { BoardState, Arrival } from "../models";
 import { getAdapter } from "../adapters";
 import type { FetchParams } from "../adapters/base";
 
-export const MAX_ETA_MS = 100 * 60000 - 1000; // 99 minutes 59 seconds
+export const MAX_ETA_MS = 99 * 60 * 1000; // 99 minutes
 
 export function filterByMaxEta(arrivals: Arrival[]): Arrival[] {
   const now = Date.now();

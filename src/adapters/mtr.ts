@@ -19,7 +19,11 @@ import type {
 } from "./base";
 import type { BoardState } from "../models";
 import { ARRIVAL_STATUS, type ArrivalStatus } from "../models/arrival";
-import { MTR_LINES, getMtrStationInfo } from "../data/mtr";
+import {
+  MTR_LINES,
+  getMtrStationInfo,
+  getMtrLineDirections,
+} from "../data/mtr";
 
 // ── Zod schemas ────────────────────────────────────────────────────────────────
 
@@ -252,10 +256,10 @@ export const mtrAdapter: TransportAdapter = {
           id: params.serviceId,
           name: lineInfo?.nameEn ?? params.serviceId,
           nameZh: lineInfo?.nameZh ?? params.serviceId,
-          direction: params.directionId as "up" | "down",
+          direction: params.directionId as "up" | "down" | undefined,
           color: lineInfo?.color ?? "#E2231A",
         },
-        direction: params.directionId as "up" | "down",
+        direction: params.directionId as "up" | "down" | undefined,
         arrivals: [],
         lastUpdated: parseHktTime(validated.timestamp),
       };
@@ -266,33 +270,26 @@ export const mtrAdapter: TransportAdapter = {
     const stationData = validated.data?.[dataKey];
 
     const dir = toApiDirection(params.directionId);
-    const rawArrivals: MtrArrival[] =
-      dir === "UP"
-        ? (stationData?.UP ?? [])
-        : dir === "DOWN"
-          ? (stationData?.DOWN ?? [])
-          : [...(stationData?.UP ?? []), ...(stationData?.DOWN ?? [])];
-
-    // Sort by seq ascending — do NOT filter by valid (it is a dummy field per spec)
-    const sortedArrivals = [...rawArrivals].sort((a, b) => a.seq - b.seq);
-
     const isDelayed = validated.isdelay === "Y";
 
-    const arrivals = sortedArrivals.map((a) => {
+    /** Map a raw MtrArrival to an Arrival model entry */
+    const mapArrival = (
+      a: MtrArrival,
+      arrivalDirection: "up" | "down" | undefined
+    ) => {
       const destStation = getMtrStationInfo(params.serviceId, a.dest);
       const isViaRacecourse = a.route === "RAC";
 
       const { destination, destinationZh } = getDestinationText({
         serviceId: params.serviceId,
         stopId: params.stopId,
-        directionId: params.directionId,
+        directionId: arrivalDirection,
         destCode: a.dest,
         destNameEn: destStation?.nameEn,
         destNameZh: destStation?.nameZh,
         isViaRacecourse,
       });
 
-      // Check if train has arrived: curr_time equals arrival time
       const isArrived = stationData?.curr_time === a.time;
 
       return {
@@ -309,8 +306,61 @@ export const mtrAdapter: TransportAdapter = {
         platform: a.plat,
         destination,
         destinationZh,
+        ...(arrivalDirection !== undefined
+          ? { direction: arrivalDirection }
+          : {}),
       };
-    });
+    };
+
+    let arrivals;
+
+    if (dir === "UP" || dir === "DOWN") {
+      // Single direction: show all arrivals for that direction
+      const rawArrivals: MtrArrival[] =
+        dir === "UP" ? (stationData?.UP ?? []) : (stationData?.DOWN ?? []);
+      const sortedArrivals = [...rawArrivals].sort((a, b) => a.seq - b.seq);
+      const urlDir = dir === "UP" ? "up" : "down";
+      arrivals = sortedArrivals.map((a) => mapArrival(a, urlDir));
+    } else {
+      // No direction: check if station is a terminus (start or end of any direction)
+      const lineDirections = getMtrLineDirections(params.serviceId);
+      const isTerminus = lineDirections.some(
+        (d) =>
+          d.startTermini.includes(params.stopId) ||
+          d.endTermini.includes(params.stopId)
+      );
+
+      if (isTerminus) {
+        // Terminus: combine all arrivals, sort by ETA, show top 4
+        const allArrivals = [
+          ...(stationData?.UP ?? []).map((a) => ({
+            raw: a,
+            dir: "up" as const,
+          })),
+          ...(stationData?.DOWN ?? []).map((a) => ({
+            raw: a,
+            dir: "down" as const,
+          })),
+        ].sort((a, b) => a.raw.seq - b.raw.seq);
+
+        arrivals = allArrivals
+          .slice(0, 4)
+          .map(({ raw, dir }) => mapArrival(raw, dir));
+      } else {
+        // Intermediate station: top 2 from UP + top 2 from DOWN
+        const upArrivals = [...(stationData?.UP ?? [])]
+          .sort((a, b) => a.seq - b.seq)
+          .slice(0, 2);
+        const downArrivals = [...(stationData?.DOWN ?? [])]
+          .sort((a, b) => a.seq - b.seq)
+          .slice(0, 2);
+
+        arrivals = [
+          ...upArrivals.map((a) => mapArrival(a, "up")),
+          ...downArrivals.map((a) => mapArrival(a, "down")),
+        ];
+      }
+    }
 
     const lastUpdated = stationData?.curr_time
       ? parseHktTime(stationData.curr_time)
@@ -331,10 +381,10 @@ export const mtrAdapter: TransportAdapter = {
         id: params.serviceId,
         name: lineInfo?.nameEn ?? params.serviceId,
         nameZh: lineInfo?.nameZh ?? params.serviceId,
-        direction: params.directionId as "up" | "down",
+        direction: params.directionId as "up" | "down" | undefined,
         color: lineInfo?.color ?? "#E2231A",
       },
-      direction: params.directionId as "up" | "down",
+      direction: params.directionId as "up" | "down" | undefined,
       arrivals,
       lastUpdated,
     };

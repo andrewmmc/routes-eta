@@ -29,4 +29,5 @@ export interface Arrival {
   destinationZh?: string;
   crowding?: CrowdingLevel; // Optional crowding level
   trainLength?: number; // Number of cars (MTR specific)
+  direction?: "up" | "down"; // Direction of this arrival (used when board shows both directions)
 }

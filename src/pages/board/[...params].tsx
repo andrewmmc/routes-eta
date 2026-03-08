@@ -44,13 +44,19 @@ export default function BoardPage() {
   useEffect(() => {
     if (!router.isReady) return;
 
-    // Check required params exist
-    if (!operatorId || !serviceId || !stopId || !directionId) {
+    // Check required params exist (direction is optional for MTR)
+    if (!operatorId || !serviceId || !stopId) {
       router.replace("/");
       return;
     }
 
-    // Validate MTR routes
+    // Non-MTR operators require direction
+    if (operatorId !== "mtr" && !directionId) {
+      router.replace("/");
+      return;
+    }
+
+    // Validate MTR routes (direction is optional)
     if (operatorId === "mtr") {
       const isValid = validateMtrRouteParams(serviceId, stopId, directionId);
       if (!isValid) {
@@ -103,7 +109,12 @@ export default function BoardPage() {
   }
 
   // Show loading while validating/redirecting
-  if (!operatorId || !serviceId || !stopId || !directionId) {
+  if (!operatorId || !serviceId || !stopId) {
+    return <LoadingBoard {...loadingProps} />;
+  }
+
+  // Non-MTR operators require direction
+  if (operatorId !== "mtr" && !directionId) {
     return <LoadingBoard {...loadingProps} />;
   }
 
