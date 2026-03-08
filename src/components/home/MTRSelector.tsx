@@ -113,6 +113,10 @@ export function MTRSelector({
 
   const handleDirectionChange = useCallback(
     (dir: string) => {
+      if (!dir) {
+        onDirectionChange(dir, false);
+        return;
+      }
       const newEntry = MTR_LINE_DIRECTIONS.find(
         (d) => d.lineCode === selectedLine && d.urlDirection === dir
       );
@@ -161,30 +165,8 @@ export function MTRSelector({
         </SelectWrapper>
       </div>
 
-      {/* Direction selector */}
-      <div className="mb-4">
-        <label className="mb-1.5 block text-sm font-code tracking-widest uppercase text-transit-muted">
-          {t("home.direction")}
-        </label>
-        <SelectWrapper>
-          <select
-            className={selectClass}
-            value={selectedDirection}
-            onChange={(e) => handleDirectionChange(e.target.value)}
-            disabled={!selectedLine}
-          >
-            <option value="">{t("home.selectDirection")}</option>
-            {directions.map((d) => (
-              <option key={d.urlDirection} value={d.urlDirection}>
-                {getDirectionLabel(d, language)}
-              </option>
-            ))}
-          </select>
-        </SelectWrapper>
-      </div>
-
       {/* Station selector */}
-      <div className="mb-6">
+      <div className="mb-4">
         <label className="mb-1.5 block text-sm font-code tracking-widest uppercase text-transit-muted">
           {t("home.station")}
         </label>
@@ -202,6 +184,28 @@ export function MTRSelector({
                   { name: s.nameEn, nameZh: s.nameZh },
                   language
                 )}
+              </option>
+            ))}
+          </select>
+        </SelectWrapper>
+      </div>
+
+      {/* Direction selector */}
+      <div className="mb-6">
+        <label className="mb-1.5 block text-sm font-code tracking-widest uppercase text-transit-muted">
+          {t("home.direction")}
+        </label>
+        <SelectWrapper>
+          <select
+            className={selectClass}
+            value={selectedDirection}
+            onChange={(e) => handleDirectionChange(e.target.value)}
+            disabled={!selectedLine}
+          >
+            <option value="">{t("home.selectDirection")}</option>
+            {directions.map((d) => (
+              <option key={d.urlDirection} value={d.urlDirection}>
+                {getDirectionLabel(d, language)}
               </option>
             ))}
           </select>

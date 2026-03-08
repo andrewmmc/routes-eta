@@ -69,7 +69,6 @@ export function MTRBoard({
 
   const displayedArrivals = boardState.arrivals.slice(0, config.rows);
   const emptyRowsCount = config.rows - displayedArrivals.length;
-  const hasNoData = displayedArrivals.length === 0;
 
   return (
     <div className="flex h-screen flex-col bg-white">
@@ -81,28 +80,38 @@ export function MTRBoard({
       />
 
       {/* Arrival Rows */}
-      {displayedArrivals.map((arrival, index) => (
-        <MTRArrivalRow
-          key={index}
-          arrival={arrival}
-          index={index}
-          lineColor={boardState.service.color}
-          language={language}
-          isDepartureStation={
-            arrival.direction
-              ? isDepartureStationForDirection(arrival.direction)
-              : isDepartureStation
-          }
-        />
-      ))}
+      {displayedArrivals.map((arrival, index) => {
+        const prevArrival = displayedArrivals[index - 1];
+        const showSeparator =
+          !boardState.direction &&
+          index > 0 &&
+          arrival.direction &&
+          prevArrival?.direction &&
+          arrival.direction !== prevArrival.direction;
+
+        return (
+          <div key={index} className="contents">
+            {showSeparator && <div className="h-[3px] w-full bg-black" />}
+            <MTRArrivalRow
+              arrival={arrival}
+              index={index}
+              lineColor={boardState.service.color}
+              language={language}
+              isDepartureStation={
+                arrival.direction
+                  ? isDepartureStationForDirection(arrival.direction)
+                  : isDepartureStation
+              }
+            />
+          </div>
+        );
+      })}
 
       {/* Filler rows to always show config.rows */}
       {emptyRowsCount > 0 && (
         <MTREmptyState
           rows={emptyRowsCount}
           startIndex={displayedArrivals.length}
-          showMessage={hasNoData}
-          language={language}
         />
       )}
     </div>
