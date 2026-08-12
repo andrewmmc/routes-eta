@@ -5,13 +5,14 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-static-board-pages.ts",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "generate:mtr": "npx ts-node scripts/generate-mtr-data.ts",
+    "generate:mtr": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-mtr-data.ts && prettier --write src/data/mtr-directions.generated.ts",
     "prepare": "husky"
   },
   "dependencies": {

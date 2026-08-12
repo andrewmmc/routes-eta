@@ -29,7 +29,7 @@ import {
 import { useTranslation } from "@/hooks/useTranslation";
 import { getLocalizedName, formatLocalizedTime } from "@/utils/localization";
 import { getAdapter } from "../../adapters";
-import { validateMtrRouteParams } from "../../data/mtr";
+import { validateBoardRouteParams } from "@/utils/validation";
 
 export default function BoardPage() {
   const router = useRouter();
@@ -40,31 +40,15 @@ export default function BoardPage() {
   const [operatorId = "", serviceId = "", stopId = "", directionId] =
     params ?? [];
 
+  const isValidRoute = router.isReady && validateBoardRouteParams(params);
+
   // Validate route params and redirect to home if invalid
   useEffect(() => {
     if (!router.isReady) return;
-
-    // Check required params exist (direction is optional for MTR)
-    if (!operatorId || !serviceId || !stopId) {
+    if (!isValidRoute) {
       router.replace("/");
-      return;
     }
-
-    // Non-MTR operators require direction
-    if (operatorId !== "mtr" && !directionId) {
-      router.replace("/");
-      return;
-    }
-
-    // Validate MTR routes (direction is optional)
-    if (operatorId === "mtr") {
-      const isValid = validateMtrRouteParams(serviceId, stopId, directionId);
-      if (!isValid) {
-        router.replace("/");
-        return;
-      }
-    }
-  }, [router.isReady, router, operatorId, serviceId, stopId, directionId]);
+  }, [router.isReady, router, isValidRoute]);
 
   // Get board config (or create default)
   const config = getBoardConfigFromParams(
@@ -82,6 +66,7 @@ export default function BoardPage() {
     serviceId,
     directionId,
     refreshInterval: 60000, // TODO: Make configurable
+    enabled: isValidRoute,
   });
 
   // Determine skin based on adapter capabilities
@@ -109,12 +94,7 @@ export default function BoardPage() {
   }
 
   // Show loading while validating/redirecting
-  if (!operatorId || !serviceId || !stopId) {
-    return <LoadingBoard {...loadingProps} />;
-  }
-
-  // Non-MTR operators require direction
-  if (operatorId !== "mtr" && !directionId) {
+  if (!isValidRoute) {
     return <LoadingBoard {...loadingProps} />;
   }
 

@@ -10,12 +10,19 @@ import { getAdapter } from "../adapters";
 import type { FetchParams } from "../adapters/base";
 
 export const MAX_ETA_MS = 99 * 60 * 1000; // 99 minutes
+export const PAST_ETA_GRACE_MS = 60 * 1000; // Keep just-arrived trains for 1 minute
 
 export function filterByMaxEta(arrivals: Arrival[]): Arrival[] {
   const now = Date.now();
-  return arrivals.filter(
-    (arrival) => !arrival.eta || arrival.eta.getTime() - now <= MAX_ETA_MS
-  );
+  return arrivals.filter((arrival) => {
+    if (!arrival.eta) return true;
+    const diffMs = arrival.eta.getTime() - now;
+    return (
+      Number.isFinite(diffMs) &&
+      diffMs >= -PAST_ETA_GRACE_MS &&
+      diffMs <= MAX_ETA_MS
+    );
+  });
 }
 
 export interface UseBoardDataOptions {
@@ -24,6 +31,7 @@ export interface UseBoardDataOptions {
   serviceId: string;
   directionId?: string;
   refreshInterval?: number;
+  enabled?: boolean;
 }
 
 export interface UseBoardDataReturn {
@@ -47,10 +55,11 @@ export function useBoardData({
   serviceId,
   directionId,
   refreshInterval = 60000, // Default: 60 seconds
+  enabled = true,
 }: UseBoardDataOptions): UseBoardDataReturn {
   // Null key tells SWR to skip fetching when required params are missing
   const cacheKey =
-    operatorId && serviceId && stopId
+    enabled && operatorId && serviceId && stopId
       ? `board-${operatorId}-${serviceId}-${stopId}-${directionId || ""}`
       : null;
 

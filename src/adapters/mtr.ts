@@ -27,13 +27,17 @@ import {
 
 // ── Zod schemas ────────────────────────────────────────────────────────────────
 
+const HktDateTimeSchema = z
+  .string()
+  .refine((value) => tryParseHktTime(value) !== null, "Invalid HKT datetime");
+
 const MtrArrivalSchema = z.object({
   // seq is documented as Numbers but the API returns it as a string
   seq: z.coerce.number(),
   dest: z.string(),
   // plat is documented as Numbers but the API returns it as a string
   plat: z.coerce.string(),
-  time: z.string(), // "YYYY-MM-DD HH:MM:SS" in HKT (UTC+8)
+  time: HktDateTimeSchema, // "YYYY-MM-DD HH:MM:SS" in HKT (UTC+8)
   // ttnt, valid, source are dummy fields per spec — kept for schema completeness only
   ttnt: z.union([z.string(), z.number()]).optional(),
   valid: z.string().optional(), // "Y" = real ETA, "N" = timetable schedule only
@@ -80,13 +84,41 @@ type MtrArrival = z.infer<typeof MtrArrivalSchema>;
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 const MTR_API_BASE = "https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php";
+const HKT_DATE_TIME_PATTERN =
+  /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/;
+
+function tryParseHktTime(timeStr: string): Date | null {
+  const match = HKT_DATE_TIME_PATTERN.exec(timeStr);
+  if (!match) return null;
+
+  const [, year, month, day, hour, minute, second] = match.map(Number);
+  const timestamp = Date.UTC(year, month - 1, day, hour - 8, minute, second);
+  const hktParts = new Date(timestamp + 8 * 60 * 60 * 1000);
+
+  if (
+    hktParts.getUTCFullYear() !== year ||
+    hktParts.getUTCMonth() !== month - 1 ||
+    hktParts.getUTCDate() !== day ||
+    hktParts.getUTCHours() !== hour ||
+    hktParts.getUTCMinutes() !== minute ||
+    hktParts.getUTCSeconds() !== second
+  ) {
+    return null;
+  }
+
+  return new Date(timestamp);
+}
 
 /**
  * Parse an HKT datetime string ("YYYY-MM-DD HH:MM:SS") to a Date object.
  * HKT is UTC+8.
  */
 export function parseHktTime(timeStr: string): Date {
-  return new Date(timeStr.replace(" ", "T") + "+08:00");
+  const parsed = tryParseHktTime(timeStr);
+  if (!parsed) {
+    throw new RangeError(`Invalid HKT datetime: ${timeStr}`);
+  }
+  return parsed;
 }
 
 /**
@@ -239,35 +271,32 @@ export const mtrAdapter: TransportAdapter = {
     const lineInfo = MTR_LINES[params.serviceId];
     const stationInfo = getMtrStationInfo(params.serviceId, params.stopId);
 
-    // Handle error/unsuccessful responses by returning empty arrivals
+    // API-level failures must reach SWR's retry and error handling.
     if (validated.status === 0) {
-      return {
-        operator: {
-          id: "mtr",
-          name: "MTR",
-          nameZh: "港鐵",
-        },
-        station: {
-          id: params.stopId,
-          name: stationInfo?.nameEn ?? params.stopId,
-          nameZh: stationInfo?.nameZh ?? params.stopId,
-        },
-        service: {
-          id: params.serviceId,
-          name: lineInfo?.nameEn ?? params.serviceId,
-          nameZh: lineInfo?.nameZh ?? params.serviceId,
-          direction: params.directionId as "up" | "down" | undefined,
-          color: lineInfo?.color ?? "#E2231A",
-        },
-        direction: params.directionId as "up" | "down" | undefined,
-        arrivals: [],
-        lastUpdated: parseHktTime(validated.timestamp),
-      };
+      throw new Error(
+        `MTR API error (${validated.error.errorCode}): ${validated.error.errorMsg}`
+      );
     }
 
     // The data key uses the format "{LINE}-{STATION}"
     const dataKey = `${params.serviceId}-${params.stopId}`;
     const stationData = validated.data?.[dataKey];
+    if (!stationData) {
+      throw new Error(`MTR API response missing station data for ${dataKey}`);
+    }
+
+    const lastUpdated = [
+      stationData.curr_time,
+      stationData.sys_time,
+      validated.curr_time,
+      validated.sys_time,
+    ]
+      .map(tryParseHktTime)
+      .find((date): date is Date => date !== null);
+
+    if (!lastUpdated) {
+      throw new Error("MTR API response has no valid update time");
+    }
 
     const dir = toApiDirection(params.directionId);
     const isDelayed = validated.isdelay === "Y";
@@ -361,10 +390,6 @@ export const mtrAdapter: TransportAdapter = {
         ];
       }
     }
-
-    const lastUpdated = stationData?.curr_time
-      ? parseHktTime(stationData.curr_time)
-      : new Date();
 
     return {
       operator: {

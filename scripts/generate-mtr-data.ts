@@ -7,7 +7,7 @@
  * - TKS-DT/TKS-UT (Po Lam / LOHAS Park branch) are merged into TKL DT/UT
  * - Extra stations absent from the CSV are injected via ADDITIONAL_STATIONS
  *
- * Usage: npx ts-node scripts/generate-mtr-data.ts
+ * Usage: npm run generate:mtr
  */
 
 import * as fs from "fs";

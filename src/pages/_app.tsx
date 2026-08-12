@@ -12,26 +12,19 @@ import {
   LanguageProvider,
   useLanguageContext,
 } from "@/contexts/LanguageContext";
-import { useEffect, useState } from "react";
-import defaultMessages from "../../messages/zh.json";
+import { useEffect } from "react";
+import enMessages from "../../messages/en.json";
+import zhMessages from "../../messages/zh.json";
 
 function AppContent({ Component, pageProps }: AppProps) {
   const { language } = useLanguageContext();
-  const [messages, setMessages] = useState(
-    pageProps.messages ?? defaultMessages
-  );
+  const messages =
+    pageProps.messages ?? (language === "en" ? enMessages : zhMessages);
 
   // Update HTML lang attribute when language changes
   useEffect(() => {
     const htmlLang = language === "zh" ? "zh-HK" : "en";
     document.documentElement.lang = htmlLang;
-  }, [language]);
-
-  // Load messages for the active language
-  useEffect(() => {
-    import(`../../messages/${language}.json`).then((mod) => {
-      setMessages(mod.default);
-    });
   }, [language]);
 
   return (

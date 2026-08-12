@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { filterByMaxEta, MAX_ETA_MS } from "./useBoardData";
+import { filterByMaxEta, MAX_ETA_MS, PAST_ETA_GRACE_MS } from "./useBoardData";
 import type { Arrival } from "../models";
 
 describe("filterByMaxEta", () => {
@@ -51,15 +51,22 @@ describe("filterByMaxEta", () => {
     expect(result).toHaveLength(2);
   });
 
-  it("keeps arrivals in the past or at current time", () => {
+  it("keeps just-arrived trains but filters stale and invalid ETAs", () => {
     const arrivals: Arrival[] = [
       { eta: new Date("2026-01-15T11:30:00+08:00") }, // 30 mins ago
+      { eta: new Date("invalid") },
+      { eta: new Date("2026-01-15T11:59:00+08:00") }, // grace boundary
       { eta: new Date("2026-01-15T12:00:00+08:00") }, // now
       { eta: new Date("2026-01-15T12:30:00+08:00") }, // 30 mins future
     ];
 
     const result = filterByMaxEta(arrivals);
     expect(result).toHaveLength(3);
+    expect(result.map((arrival) => arrival.eta?.toISOString())).toEqual([
+      "2026-01-15T03:59:00.000Z",
+      "2026-01-15T04:00:00.000Z",
+      "2026-01-15T04:30:00.000Z",
+    ]);
   });
 
   it("handles edge case exactly at 99 minutes", () => {
@@ -103,5 +110,9 @@ describe("MAX_ETA_MS constant", () => {
   it("is 99 minutes in milliseconds", () => {
     expect(MAX_ETA_MS).toBe(99 * 60 * 1000);
     expect(MAX_ETA_MS).toBe(5940000);
+  });
+
+  it("allows a one-minute grace period for just-arrived trains", () => {
+    expect(PAST_ETA_GRACE_MS).toBe(60 * 1000);
   });
 });

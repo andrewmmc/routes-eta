@@ -1,4 +1,9 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useSyncExternalStore,
+  ReactNode,
+} from "react";
 import { DEFAULT_LANGUAGE } from "@/types/language";
 import type { Language } from "@/types/language";
 
@@ -14,25 +19,38 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 );
 
 const STORAGE_KEY = "preferred-language";
+const languageListeners = new Set<() => void>();
 
-function getInitialLanguage(): Language {
-  if (typeof window === "undefined") {
-    return DEFAULT_LANGUAGE;
-  }
+function getLanguageSnapshot(): Language {
   const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored === "en" || stored === "zh") {
-    return stored;
-  }
-  return DEFAULT_LANGUAGE;
+  return stored === "en" || stored === "zh" ? stored : DEFAULT_LANGUAGE;
+}
+
+function subscribeToLanguage(onStoreChange: () => void): () => void {
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key === STORAGE_KEY) onStoreChange();
+  };
+
+  languageListeners.add(onStoreChange);
+  window.addEventListener("storage", handleStorage);
+
+  return () => {
+    languageListeners.delete(onStoreChange);
+    window.removeEventListener("storage", handleStorage);
+  };
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(getInitialLanguage);
+  const language = useSyncExternalStore(
+    subscribeToLanguage,
+    getLanguageSnapshot,
+    () => DEFAULT_LANGUAGE
+  );
 
   // Save language to localStorage when it changes
   const setLanguage = (newLanguage: Language) => {
-    setLanguageState(newLanguage);
     localStorage.setItem(STORAGE_KEY, newLanguage);
+    languageListeners.forEach((listener) => listener());
   };
 
   return (

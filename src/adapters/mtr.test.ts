@@ -24,6 +24,13 @@ describe("parseHktTime", () => {
     const result = parseHktTime("2026-01-15 23:59:59");
     expect(result.toISOString()).toBe("2026-01-15T15:59:59.000Z");
   });
+
+  it("rejects malformed and impossible timestamps", () => {
+    expect(() => parseHktTime("-")).toThrow("Invalid HKT datetime");
+    expect(() => parseHktTime("2026-02-30 12:00:00")).toThrow(
+      "Invalid HKT datetime"
+    );
+  });
 });
 
 describe("toApiDirection", () => {
@@ -514,7 +521,7 @@ describe("mtrAdapter.mapToBoardState", () => {
     expect(result.arrivals[1].status).toBeUndefined();
   });
 
-  it("returns empty arrivals when API returns error response", async () => {
+  it("throws when API returns an error response", async () => {
     const raw = {
       resultCode: 0,
       timestamp: "2026-02-21 03:17:02",
@@ -526,9 +533,9 @@ describe("mtrAdapter.mapToBoardState", () => {
       },
     };
 
-    const result = await mtrAdapter.mapToBoardState(raw, defaultParams);
-    expect(result.arrivals).toHaveLength(0);
-    expect(result.lastUpdated.toISOString()).toBe("2026-02-20T19:17:02.000Z");
+    await expect(
+      mtrAdapter.mapToBoardState(raw, defaultParams)
+    ).rejects.toThrow("MTR API error (NT-204): The contents are empty!");
   });
 
   it("sets status to 'Delayed' when isdelay is Y", async () => {
@@ -564,7 +571,7 @@ describe("mtrAdapter.mapToBoardState", () => {
     expect(result.arrivals[0].status).toBe("Arriving");
   });
 
-  it("returns empty arrivals when API returns train fault response (dashed times)", async () => {
+  it("throws when a train fault response has no valid update time", async () => {
     const raw = {
       sys_time: "-",
       curr_time: "-",
@@ -585,8 +592,24 @@ describe("mtrAdapter.mapToBoardState", () => {
       directionId: "down",
     };
 
-    const result = await mtrAdapter.mapToBoardState(raw, params);
-    expect(result.arrivals).toHaveLength(0);
-    expect(result.lastUpdated).toBeInstanceOf(Date);
+    await expect(mtrAdapter.mapToBoardState(raw, params)).rejects.toThrow(
+      "MTR API response has no valid update time"
+    );
+  });
+
+  it("rejects arrivals with invalid timestamps", async () => {
+    const raw = createMockApiResponse({
+      data: {
+        "TWL-CEN": {
+          curr_time: "2026-01-15 12:00:00",
+          sys_time: "2026-01-15 12:00:00",
+          UP: [{ seq: 1, dest: "TSW", plat: "1", time: "invalid" }],
+        },
+      },
+    });
+
+    await expect(
+      mtrAdapter.mapToBoardState(raw, defaultParams)
+    ).rejects.toThrow("Invalid HKT datetime");
   });
 });

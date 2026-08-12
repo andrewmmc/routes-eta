@@ -155,7 +155,11 @@ export function MTRArrivalRow({
 function isArriving(eta: Date | null): boolean {
   if (!eta) return false;
   const diffMs = eta.getTime() - Date.now();
-  return diffMs <= MTR_TIMING.arrivingThresholdMs;
+  return (
+    Number.isFinite(diffMs) &&
+    diffMs >= -MTR_TIMING.arrivingThresholdMs &&
+    diffMs <= MTR_TIMING.arrivingThresholdMs
+  );
 }
 
 /**
