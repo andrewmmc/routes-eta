@@ -103,8 +103,8 @@ export default function BoardPage() {
     return <LoadingBoard {...loadingProps} />;
   }
 
-  // Error state
-  if (isError) {
+  // Error state — keep showing a still-valid cached board after a failed refresh
+  if (isError && !data) {
     return (
       <ErrorDisplay
         message={error?.message || "Failed to load board data"}

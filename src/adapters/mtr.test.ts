@@ -1,10 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   parseHktTime,
   toApiDirection,
   deriveStatus,
   getDestinationText,
   mtrAdapter,
+  MTR_FETCH_TIMEOUT_MS,
 } from "./mtr";
 import type { FetchParams } from "./base";
 
@@ -92,15 +93,15 @@ describe("deriveStatus", () => {
     ).toBe("Arriving");
   });
 
-  it("returns 'Arriving' for timetype 'A' (EAL)", () => {
+  it("does not treat EAL timetype A as a live Arriving status", () => {
     expect(
       deriveStatus(
         createParams({ timetype: "A", arrivalTime: "2026-01-15 12:05:00" })
       )
-    ).toBe("Arriving");
+    ).toBe(undefined);
     expect(deriveStatus(createParams({ timetype: "A", isDelayed: true }))).toBe(
-      "Arriving"
-    ); // time proximity takes precedence
+      "Delayed"
+    );
   });
 
   it("returns 'Departing' for timetype 'D' (EAL)", () => {
@@ -502,6 +503,38 @@ describe("mtrAdapter.mapToBoardState", () => {
     expect(result.arrivals).toHaveLength(2);
   });
 
+  it("sorts combined terminus arrivals by ETA rather than seq", async () => {
+    const raw = createMockApiResponse({
+      data: {
+        "TWL-CEN": {
+          curr_time: "2026-01-15 12:00:00",
+          sys_time: "2026-01-15 12:00:00",
+          UP: [
+            { seq: 1, dest: "TSW", plat: "1", time: "2026-01-15 12:12:00" },
+            { seq: 2, dest: "TSW", plat: "1", time: "2026-01-15 12:04:00" },
+          ],
+          DOWN: [
+            { seq: 1, dest: "TSW", plat: "2", time: "2026-01-15 12:08:00" },
+          ],
+        },
+      },
+    });
+
+    const result = await mtrAdapter.mapToBoardState(raw, {
+      stopId: "CEN",
+      serviceId: "TWL",
+      directionId: undefined,
+    });
+
+    expect(
+      result.arrivals.map((arrival) => arrival.eta?.toISOString())
+    ).toEqual([
+      "2026-01-15T04:04:00.000Z",
+      "2026-01-15T04:08:00.000Z",
+      "2026-01-15T04:12:00.000Z",
+    ]);
+  });
+
   it("sets status to 'Arrived' when curr_time equals arrival time", async () => {
     const raw = createMockApiResponse({
       data: {
@@ -547,7 +580,7 @@ describe("mtrAdapter.mapToBoardState", () => {
     expect(result.arrivals[0].status).toBe("Delayed");
   });
 
-  it("sets status based on timetype (takes precedence over isdelay)", async () => {
+  it("does not let EAL timetype A override a delay", async () => {
     const raw = createMockApiResponse({
       isdelay: "Y",
       data: {
@@ -568,7 +601,7 @@ describe("mtrAdapter.mapToBoardState", () => {
     });
 
     const result = await mtrAdapter.mapToBoardState(raw, defaultParams);
-    expect(result.arrivals[0].status).toBe("Arriving");
+    expect(result.arrivals[0].status).toBe("Delayed");
   });
 
   it("throws when a train fault response has no valid update time", async () => {
@@ -611,5 +644,47 @@ describe("mtrAdapter.mapToBoardState", () => {
     await expect(
       mtrAdapter.mapToBoardState(raw, defaultParams)
     ).rejects.toThrow("Invalid HKT datetime");
+  });
+});
+
+describe("mtrAdapter.fetchRaw", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  it("passes an abort signal to fetch", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ status: 1 }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await mtrAdapter.fetchRaw({ stopId: "CEN", serviceId: "TWL" });
+
+    expect(fetchMock).toHaveBeenCalledOnce();
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it("throws when the request times out", async () => {
+    vi.useFakeTimers();
+    const abortError = Object.assign(new Error("Aborted"), {
+      name: "AbortError",
+    });
+    const fetchMock = vi.fn(
+      (_url: string, init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () => reject(abortError));
+        })
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const pending = mtrAdapter.fetchRaw({ stopId: "CEN", serviceId: "TWL" });
+    const expectation = expect(pending).rejects.toThrow(
+      `MTR API request timed out after ${MTR_FETCH_TIMEOUT_MS}ms`
+    );
+    await vi.advanceTimersByTimeAsync(MTR_FETCH_TIMEOUT_MS);
+    await expectation;
   });
 });

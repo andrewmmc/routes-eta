@@ -83,7 +83,6 @@ export function useBoardData({
     revalidateOnFocus: false,
     shouldRetryOnError: true,
     errorRetryCount: 3,
-    // TODO: Add more SWR options as needed
   });
 
   return {

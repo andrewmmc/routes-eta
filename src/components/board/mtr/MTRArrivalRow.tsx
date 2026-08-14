@@ -16,6 +16,8 @@ import {
   MTR_COLORS,
   MTR_TIMING,
 } from "@/utils/styles";
+import { useNow } from "../../../hooks/useNow";
+import { getEtaMinutes, isWithinArrivingWindow } from "../../../utils/eta";
 
 export interface MTRArrivalRowProps {
   arrival: Arrival;
@@ -37,11 +39,16 @@ export function MTRArrivalRow({
   const zhTextRef = useRef<HTMLSpanElement>(null);
   const enTextRef = useRef<HTMLSpanElement>(null);
   const [marqueeNeeded, setMarqueeNeeded] = useState({ zh: false, en: false });
+  const now = useNow(MTR_TIMING.clockUpdateMs);
 
   // Determine if arriving soon (within 1 minute)
-  const isArrivingSoon = isArriving(arrival.eta);
+  const isArrivingSoon = isWithinArrivingWindow(
+    arrival.eta,
+    now,
+    MTR_TIMING.arrivingThresholdMs
+  );
   // Computed minutes — null when eta is null
-  const etaMinutes = getETAMinutes(arrival.eta);
+  const etaMinutes = getEtaMinutes(arrival.eta, now);
 
   // Get text based on current language
   const labels = getMtrLabels(language);
@@ -124,8 +131,14 @@ export function MTRArrivalRow({
 
         {/* Column 2: ETA */}
         <div className="flex min-w-[120px] items-center justify-end gap-2 md:min-w-[240px] md:gap-3 lg:min-w-[320px] lg:gap-4">
-          {arrival.status === ARRIVAL_STATUS.ARRIVED ? null : isArrivingSoon ||
-            etaMinutes === 0 ? ( // Train has arrived - leave column empty
+          {arrival.status === ARRIVAL_STATUS.ARRIVED ? null : etaMinutes ===
+            null ? (
+            <span
+              className={`text-xl text-black md:text-4xl lg:text-6xl ${textFontClass}`}
+            >
+              {labels.noSchedule}
+            </span>
+          ) : isArrivingSoon || etaMinutes === 0 ? (
             <span
               className={`text-xl text-black md:text-4xl lg:text-6xl ${textFontClass}`}
             >
@@ -147,28 +160,6 @@ export function MTRArrivalRow({
       </div>
     </div>
   );
-}
-
-/**
- * Check if train is arriving (within threshold)
- */
-function isArriving(eta: Date | null): boolean {
-  if (!eta) return false;
-  const diffMs = eta.getTime() - Date.now();
-  return (
-    Number.isFinite(diffMs) &&
-    diffMs >= -MTR_TIMING.arrivingThresholdMs &&
-    diffMs <= MTR_TIMING.arrivingThresholdMs
-  );
-}
-
-/**
- * Return ETA as whole minutes (rounds at 0.5). Returns null when eta is null.
- */
-function getETAMinutes(eta: Date | null): number | null {
-  if (!eta) return null;
-  const diffMs = eta.getTime() - Date.now();
-  return Math.round(diffMs / 60000);
 }
 
 export default MTRArrivalRow;

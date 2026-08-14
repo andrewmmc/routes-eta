@@ -6,7 +6,10 @@
 
 import type { Arrival } from "../../../models";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useNow } from "../../../hooks/useNow";
 import { getLocalizedName } from "@/utils/localization";
+import { getEtaMinutes } from "../../../utils/eta";
+import { MTR_TIMING } from "../../../constants/mtr-theme";
 
 export interface ArrivalRowProps {
   arrival: Arrival;
@@ -22,13 +25,14 @@ export function ArrivalRow({
   showTrainLength = false,
 }: ArrivalRowProps) {
   const { t, language } = useTranslation();
+  const now = useNow(MTR_TIMING.clockUpdateMs);
 
   const destinationName = getLocalizedName(
     { name: arrival.destination ?? "", nameZh: arrival.destinationZh },
     language
   );
 
-  const etaText = formatETA(arrival.eta);
+  const etaText = formatETA(arrival.eta, now);
   const isArriving =
     arrival.status === "Arrived" ||
     arrival.status === "Arriving" ||
@@ -115,11 +119,9 @@ function CrowdingIndicator({ level }: { level: string }) {
   );
 }
 
-export function formatETA(eta: Date | null): string {
-  if (!eta) return "--";
-
-  const diffMs = eta.getTime() - Date.now();
-  const diffMins = Math.round(diffMs / 60000);
+export function formatETA(eta: Date | null, now: number = Date.now()): string {
+  const diffMins = getEtaMinutes(eta, now);
+  if (diffMins === null) return "--";
 
   if (diffMins <= 0) return "Arr";
   if (diffMins === 1) return "1 min";

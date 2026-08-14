@@ -41,14 +41,19 @@ describe("formatETA", () => {
     expect(formatETA(future)).toBe("1 min");
   });
 
-  it("returns '1 min' for 30 seconds in future (rounds to 1)", () => {
+  it("returns '1 min' for 30 seconds in future (ceils to 1)", () => {
     const future = new Date("2024-01-01T12:00:30Z");
     expect(formatETA(future)).toBe("1 min");
   });
 
-  it("returns '2 mins' for 90 seconds in future (rounds to 2)", () => {
+  it("returns '2 mins' for 90 seconds in future (ceils to 2)", () => {
     const future = new Date("2024-01-01T12:01:30Z");
     expect(formatETA(future)).toBe("2 mins");
+  });
+
+  it("returns '3 mins' for 2 minutes 1 second (ceiling-based)", () => {
+    const future = new Date("2024-01-01T12:02:01Z");
+    expect(formatETA(future)).toBe("3 mins");
   });
 
   it("returns '5 mins' for 5 minutes in future", () => {

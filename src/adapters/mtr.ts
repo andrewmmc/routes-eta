@@ -84,6 +84,7 @@ type MtrArrival = z.infer<typeof MtrArrivalSchema>;
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 const MTR_API_BASE = "https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php";
+export const MTR_FETCH_TIMEOUT_MS = 10_000;
 const HKT_DATE_TIME_PATTERN =
   /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/;
 
@@ -152,9 +153,12 @@ export interface DeriveStatusParams {
 /**
  * Derive arrival status with priority:
  * 1. Time proximity (within 1 min) → "Arriving"
- * 2. timetype (EAL-only) → "Arriving" or "Departing"
+ * 2. timetype "D" (EAL departure timestamp) → "Departing"
  * 3. valid === "N" → "Scheduled"
  * 4. isDelayed → "Delayed"
+ *
+ * timetype "A" only means the timestamp is an arrival time, not a live
+ * "Arriving" status.
  */
 export function deriveStatus(
   params: DeriveStatusParams
@@ -169,8 +173,7 @@ export function deriveStatus(
     return ARRIVAL_STATUS.ARRIVING;
   }
 
-  // 2. Check timetype (EAL-only)
-  if (timetype === "A") return ARRIVAL_STATUS.ARRIVING;
+  // 2. EAL departure timestamps can be shown as departing
   if (timetype === "D") return ARRIVAL_STATUS.DEPARTING;
 
   // 3. Check valid field
@@ -255,7 +258,26 @@ export const mtrAdapter: TransportAdapter = {
     url.searchParams.set("line", params.serviceId);
     url.searchParams.set("sta", params.stopId);
 
-    const res = await fetch(url.toString());
+    const controller = new AbortController();
+    const timeoutId = setTimeout(
+      () => controller.abort(),
+      MTR_FETCH_TIMEOUT_MS
+    );
+
+    let res: Response;
+    try {
+      res = await fetch(url.toString(), { signal: controller.signal });
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new Error(
+          `MTR API request timed out after ${MTR_FETCH_TIMEOUT_MS}ms`
+        );
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
     if (!res.ok) {
       throw new Error(`MTR API error: ${res.status} ${res.statusText}`);
     }
@@ -360,7 +382,7 @@ export const mtrAdapter: TransportAdapter = {
       );
 
       if (isTerminus) {
-        // Terminus: combine all arrivals, sort by ETA, show top 4
+        // Terminus: combine all arrivals, sort by actual ETA, show top 4
         const allArrivals = [
           ...(stationData?.UP ?? []).map((a) => ({
             raw: a,
@@ -370,7 +392,12 @@ export const mtrAdapter: TransportAdapter = {
             raw: a,
             dir: "down" as const,
           })),
-        ].sort((a, b) => a.raw.seq - b.raw.seq);
+        ].sort((a, b) => {
+          const timeDiff =
+            parseHktTime(a.raw.time).getTime() -
+            parseHktTime(b.raw.time).getTime();
+          return timeDiff !== 0 ? timeDiff : a.raw.seq - b.raw.seq;
+        });
 
         arrivals = allArrivals
           .slice(0, 4)
