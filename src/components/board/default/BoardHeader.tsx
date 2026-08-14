@@ -23,7 +23,11 @@ export function BoardHeader({ boardState }: BoardHeaderProps) {
   const serviceName = getLocalizedName(service, language);
   const stationName = getLocalizedName(station, language);
   const directionLabel =
-    service.direction === "up" ? t("home.up") : t("home.down");
+    service.direction === "up"
+      ? t("home.up")
+      : service.direction === "down"
+        ? t("home.down")
+        : "";
 
   return (
     <div className="mb-5 pb-5 border-b border-transit-border">
@@ -51,7 +55,7 @@ export function BoardHeader({ boardState }: BoardHeaderProps) {
       {/* Direction */}
       {service.direction && (
         <p className="text-sm font-code text-transit-muted mt-1 tracking-wide">
-          {language === "zh" ? "往" : "To"} {directionLabel}
+          {t("board.to")} {directionLabel}
         </p>
       )}
     </div>

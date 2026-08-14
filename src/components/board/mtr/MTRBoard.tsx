@@ -71,7 +71,7 @@ export function MTRBoard({
   const emptyRowsCount = config.rows - displayedArrivals.length;
 
   return (
-    <div className="flex h-screen flex-col bg-white">
+    <div className="flex h-dvh max-h-dvh min-h-0 flex-col overflow-hidden bg-white">
       {/* Top Header Bar - Weather & Time */}
       <MTRHeader
         boardParams={boardParams}
@@ -112,6 +112,8 @@ export function MTRBoard({
         <MTREmptyState
           rows={emptyRowsCount}
           startIndex={displayedArrivals.length}
+          language={language}
+          showLabel={displayedArrivals.length === 0}
         />
       )}
     </div>

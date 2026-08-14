@@ -19,8 +19,8 @@ const adapters: Record<OperatorId, TransportAdapter> = {
  *
  * TODO: Add proper error handling for unknown operators
  */
-export function getAdapter(operatorId: OperatorId): TransportAdapter {
-  const adapter = adapters[operatorId];
+export function getAdapter(operatorId: string): TransportAdapter {
+  const adapter = adapters[operatorId as OperatorId];
 
   if (!adapter) {
     throw new Error(`Unknown operator: ${operatorId}`);
@@ -32,15 +32,15 @@ export function getAdapter(operatorId: OperatorId): TransportAdapter {
 /**
  * Check if an operator is supported
  */
-export function isOperatorSupported(operatorId: OperatorId): boolean {
-  return operatorId in adapters;
+export function isOperatorSupported(operatorId: string): boolean {
+  return Object.hasOwn(adapters, operatorId);
 }
 
 /**
  * Get list of all supported operators
  */
 export function getSupportedOperators(): OperatorId[] {
-  return Object.keys(adapters);
+  return Object.keys(adapters) as OperatorId[];
 }
 
 // Re-export all adapters

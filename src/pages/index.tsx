@@ -4,7 +4,7 @@
  * Landing page with transport operator tabs and selectors
  */
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
@@ -15,7 +15,8 @@ import {
   MTRSelector,
   getMtrButtonColor,
 } from "@/components/home";
-import { DEFAULT_OPERATOR, type OperatorId } from "@/models/operator";
+import { type OperatorId } from "@/models/operator";
+import { parseHomeQuery } from "@/utils/validation";
 
 function Disclaimer() {
   const { t } = useTranslation();
@@ -42,11 +43,60 @@ export default function HomePage() {
   const router = useRouter();
   const { t } = useTranslation();
 
-  const selectedOperator =
-    (router.query.operator as OperatorId) || DEFAULT_OPERATOR;
-  const selectedLine = (router.query.line as string) || "";
-  const selectedDirection = (router.query.direction as string) || "";
-  const selectedStation = (router.query.station as string) || "";
+  const selection = useMemo(() => parseHomeQuery(router.query), [router.query]);
+  const { operator: selectedOperator, line: selectedLine } = selection;
+  const { direction: selectedDirection, station: selectedStation } = selection;
+
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    const hasQuery = Boolean(
+      firstQuery(router.query.operator) ||
+      firstQuery(router.query.line) ||
+      firstQuery(router.query.direction) ||
+      firstQuery(router.query.station)
+    );
+    if (!hasQuery) return;
+
+    const nextQuery: Record<string, string> = {
+      operator: selectedOperator,
+    };
+    if (selectedLine) nextQuery.line = selectedLine;
+    if (selectedDirection) nextQuery.direction = selectedDirection;
+    if (selectedStation) nextQuery.station = selectedStation;
+
+    const current = {
+      operator: firstQuery(router.query.operator),
+      line: firstQuery(router.query.line),
+      direction: firstQuery(router.query.direction),
+      station: firstQuery(router.query.station),
+    };
+    const next = {
+      operator: nextQuery.operator ?? "",
+      line: nextQuery.line ?? "",
+      direction: nextQuery.direction ?? "",
+      station: nextQuery.station ?? "",
+    };
+
+    if (
+      current.operator === next.operator &&
+      current.line === next.line &&
+      current.direction === next.direction &&
+      current.station === next.station
+    ) {
+      return;
+    }
+
+    router.replace({ pathname: "/", query: nextQuery }, undefined, {
+      shallow: true,
+    });
+  }, [
+    router,
+    selectedOperator,
+    selectedLine,
+    selectedDirection,
+    selectedStation,
+  ]);
 
   const { canNavigate, boardUrl, buttonColor } = (() => {
     switch (selectedOperator) {
@@ -117,10 +167,11 @@ export default function HomePage() {
     <>
       <Head>
         <title>{t("home.title")}</title>
+        <meta name="description" content={t("home.subtitle")} />
       </Head>
 
-      <div className="min-h-screen bg-background">
-        <div className="mx-auto max-w-md px-4 py-10 flex flex-col min-h-screen">
+      <div className="min-h-dvh bg-background">
+        <div className="mx-auto max-w-md px-4 py-10 flex flex-col min-h-dvh">
           {/* Top bar */}
           <div className="flex items-center justify-between mb-10">
             <div className="flex items-center gap-2.5">
@@ -183,12 +234,7 @@ export default function HomePage() {
                       />
                     );
                   default:
-                    return (
-                      <p className="mb-6 text-sm font-code text-transit-muted">
-                        Operator &quot;{selectedOperator}&quot; is not yet
-                        implemented.
-                      </p>
-                    );
+                    return null;
                 }
               })()}
 
@@ -252,4 +298,9 @@ export default function HomePage() {
       </div>
     </>
   );
+}
+
+function firstQuery(value: string | string[] | undefined): string {
+  if (Array.isArray(value)) return value[0] ?? "";
+  return value ?? "";
 }

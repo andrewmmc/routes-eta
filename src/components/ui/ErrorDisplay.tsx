@@ -17,7 +17,11 @@ export function ErrorDisplay({ message, onRetry }: ErrorDisplayProps) {
   const displayMessage = message || t("errors.noData");
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div
+      className="flex min-h-dvh items-center justify-center bg-background px-4"
+      role="alert"
+      aria-live="assertive"
+    >
       <div className="mx-auto w-full max-w-md bg-transit-surface border border-transit-border">
         <div className="h-[3px] w-full bg-transit-accent" />
         <div className="px-6 py-12 text-center">

@@ -84,7 +84,7 @@ export function MTRArrivalRow({
 
   return (
     <div
-      className={`flex min-h-16 flex-1 items-center justify-between px-4 md:px-12 lg:px-16 ${bgColor}`}
+      className={`flex min-h-0 flex-1 items-center justify-between overflow-hidden px-3 md:px-12 lg:px-16 ${bgColor}`}
     >
       {/* Hidden elements to measure text width for both languages */}
       <span

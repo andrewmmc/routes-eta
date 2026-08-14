@@ -12,7 +12,6 @@
  * Invalid routes are redirected to home page.
  *
  * TODO: Add static generation for common routes
- * TODO: Add SEO metadata
  */
 
 import { useRouter } from "next/router";
@@ -60,7 +59,7 @@ export default function BoardPage() {
 
   // Fetch board data — hook must be called unconditionally before any returns.
   // useBoardData skips fetching when operatorId/serviceId/stopId are empty.
-  const { data, isLoading, isError, error, refresh } = useBoardData({
+  const { data, isLoading, isError, refresh } = useBoardData({
     operatorId,
     stopId,
     serviceId,
@@ -72,7 +71,7 @@ export default function BoardPage() {
   // Determine skin based on adapter capabilities
   let skinId: SkinId = "default";
   try {
-    const adapter = getAdapter(operatorId as "mtr");
+    const adapter = getAdapter(operatorId);
     if (adapter.capabilities.hasCustomUI) {
       // TODO: skin <> operator mapping
       skinId = "mtr";
@@ -105,17 +104,12 @@ export default function BoardPage() {
 
   // Error state — keep showing a still-valid cached board after a failed refresh
   if (isError && !data) {
-    return (
-      <ErrorDisplay
-        message={error?.message || "Failed to load board data"}
-        onRetry={refresh}
-      />
-    );
+    return <ErrorDisplay message={t("errors.noData")} onRetry={refresh} />;
   }
 
   // No data state
   if (!data) {
-    return <ErrorDisplay message="No data available" onRetry={refresh} />;
+    return <ErrorDisplay message={t("errors.noData")} onRetry={refresh} />;
   }
 
   // Format last updated for page title
@@ -143,6 +137,10 @@ export default function BoardPage() {
       <>
         <Head>
           <title>{pageTitle}</title>
+          <meta
+            name="description"
+            content={`${stationName} · ${serviceName}`}
+          />
         </Head>
         <Board {...boardProps} />
       </>
@@ -153,8 +151,9 @@ export default function BoardPage() {
     <>
       <Head>
         <title>{pageTitle}</title>
+        <meta name="description" content={`${stationName} · ${serviceName}`} />
       </Head>
-      <div className="min-h-screen bg-background px-4 py-8">
+      <div className="min-h-dvh bg-background px-4 py-8">
         <div className="mx-auto mb-4 max-w-2xl">
           <Link
             href="/"

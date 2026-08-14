@@ -6,12 +6,20 @@
  */
 
 import type { BoardProps } from "../../../models";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export function DefaultLoadingBoard({ layout = {} }: BoardProps) {
+  const { t } = useTranslation();
   const rows = layout.rows ?? 4;
 
   return (
-    <div className="min-h-screen bg-background px-4 py-8">
+    <div
+      className="min-h-dvh bg-background px-4 py-8"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <span className="sr-only">{t("common.loading")}</span>
       <div className="mx-auto max-w-2xl bg-transit-surface border border-transit-border animate-pulse">
         {/* Line color accent top bar */}
         <div className="h-[3px] w-full bg-transit-accent" />

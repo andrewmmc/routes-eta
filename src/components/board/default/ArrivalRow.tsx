@@ -32,19 +32,23 @@ export function ArrivalRow({
     language
   );
 
-  const etaText = formatETA(arrival.eta, now);
+  const etaText = formatETA(arrival.eta, now, {
+    arriving: t("board.arr"),
+    minute: t("board.minute"),
+    minutes: t("board.minutesPlural"),
+  });
   const isArriving =
     arrival.status === "Arrived" ||
     arrival.status === "Arriving" ||
-    etaText === "Arr";
+    etaText === t("board.arr");
 
   return (
     <div className="flex items-center gap-4 py-4 border-b border-transit-border last:border-0">
-      {/* Platform */}
-      {showPlatform && arrival.platform && (
+      {/* Platform — reserve the column even when a row has no platform */}
+      {showPlatform && (
         <div className="w-10 h-10 flex items-center justify-center bg-transit-border shrink-0">
           <span className="font-heading text-xl font-semibold leading-none">
-            {arrival.platform}
+            {arrival.platform ?? ""}
           </span>
         </div>
       )}
@@ -56,25 +60,34 @@ export function ArrivalRow({
         </p>
         {arrival.status && (
           <p className="text-sm font-code text-transit-muted mt-0.5 tracking-wide">
-            {arrival.status}
+            {t(`board.status.${arrival.status}`)}
           </p>
         )}
       </div>
 
       {/* Train Length */}
-      {showTrainLength && arrival.trainLength && (
-        <div className="text-sm font-code text-transit-muted text-center leading-tight shrink-0">
-          <span className="block text-sm font-medium text-foreground">
-            {arrival.trainLength}
-          </span>
-          {t("board.cars")}
+      {showTrainLength && (
+        <div className="w-10 text-sm font-code text-transit-muted text-center leading-tight shrink-0">
+          {arrival.trainLength ? (
+            <>
+              <span className="block text-sm font-medium text-foreground">
+                {arrival.trainLength}
+              </span>
+              {t("board.cars")}
+            </>
+          ) : null}
         </div>
       )}
 
       {/* Crowding */}
-      {showCrowding && arrival.crowding && (
-        <div className="shrink-0">
-          <CrowdingIndicator level={arrival.crowding} />
+      {showCrowding && (
+        <div className="w-14 shrink-0">
+          {arrival.crowding ? (
+            <CrowdingIndicator
+              level={arrival.crowding}
+              label={t(`board.crowdingLevel.${arrival.crowding}`)}
+            />
+          ) : null}
         </div>
       )}
 
@@ -92,7 +105,7 @@ export function ArrivalRow({
   );
 }
 
-function CrowdingIndicator({ level }: { level: string }) {
+function CrowdingIndicator({ level, label }: { level: string; label: string }) {
   const bars = {
     low: 1,
     medium: 2,
@@ -107,25 +120,50 @@ function CrowdingIndicator({ level }: { level: string }) {
   const activeColor = colors[level as keyof typeof colors] ?? "bg-gray-400";
 
   return (
-    <div className="flex items-end gap-0.5" title={`Crowding: ${level}`}>
-      {[1, 2, 3].map((i) => (
-        <div
-          key={i}
-          className={`w-1.5 ${i <= activeCount ? activeColor : "bg-transit-border"}`}
-          style={{ height: `${i * 5 + 4}px` }}
-        />
-      ))}
+    <div
+      className="flex flex-col items-center gap-0.5"
+      title={label}
+      aria-label={label}
+    >
+      <div className="flex items-end gap-0.5" aria-hidden="true">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className={`w-1.5 ${i <= activeCount ? activeColor : "bg-transit-border"}`}
+            style={{ height: `${i * 5 + 4}px` }}
+          />
+        ))}
+      </div>
+      <span className="text-[10px] font-code uppercase tracking-wide text-transit-muted">
+        {label}
+      </span>
     </div>
   );
 }
 
-export function formatETA(eta: Date | null, now: number = Date.now()): string {
+export interface EtaLabels {
+  arriving: string;
+  minute: string;
+  minutes: string;
+}
+
+const DEFAULT_ETA_LABELS: EtaLabels = {
+  arriving: "Arr",
+  minute: "min",
+  minutes: "mins",
+};
+
+export function formatETA(
+  eta: Date | null,
+  now: number = Date.now(),
+  labels: EtaLabels = DEFAULT_ETA_LABELS
+): string {
   const diffMins = getEtaMinutes(eta, now);
   if (diffMins === null) return "--";
 
-  if (diffMins <= 0) return "Arr";
-  if (diffMins === 1) return "1 min";
-  return `${diffMins} mins`;
+  if (diffMins <= 0) return labels.arriving;
+  if (diffMins === 1) return `1 ${labels.minute}`;
+  return `${diffMins} ${labels.minutes}`;
 }
 
 export default ArrivalRow;

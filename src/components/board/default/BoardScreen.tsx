@@ -55,7 +55,7 @@ export function BoardScreen({ boardState, layout = {} }: BoardScreenProps) {
             </div>
           )}
           {config.showCrowding && (
-            <div className="w-10 text-center text-sm font-code tracking-widest uppercase text-transit-muted">
+            <div className="w-14 text-center text-sm font-code tracking-widest uppercase text-transit-muted">
               {t("board.crowding")}
             </div>
           )}
@@ -65,7 +65,12 @@ export function BoardScreen({ boardState, layout = {} }: BoardScreenProps) {
         </div>
 
         {/* Arrival Rows */}
-        <div>
+        <div
+          className="grid gap-x-4"
+          style={{
+            gridTemplateColumns: `repeat(${Math.max(1, config.columns)}, minmax(0, 1fr))`,
+          }}
+        >
           {displayedArrivals.map((arrival, index) => (
             <ArrivalRow
               key={index}

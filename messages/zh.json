@@ -2,7 +2,8 @@
   "common": {
     "submit": "提交",
     "cancel": "取消",
-    "retry": "重試"
+    "retry": "重試",
+    "loading": "載入中"
   },
   "home": {
     "title": "香港交通到站模擬器",
@@ -28,9 +29,26 @@
     "crowding": "擠迫",
     "cars": "卡",
     "arriving": "即將抵達",
+    "arr": "到",
+    "minute": "分鐘",
     "minutes": "分鐘",
+    "minutesPlural": "分鐘",
+    "to": "往",
     "noSchedule": "暫無班次資料",
-    "lastUpdated": "最後更新"
+    "lastUpdated": "最後更新",
+    "status": {
+      "Arrived": "已到達",
+      "Arriving": "即將抵達",
+      "Departing": "正在離開",
+      "Delayed": "延誤",
+      "Scheduled": "預定班次",
+      "Cancelled": "取消"
+    },
+    "crowdingLevel": {
+      "low": "低",
+      "medium": "中",
+      "high": "高"
+    }
   },
   "nav": {
     "backToHome": "返回主頁"
@@ -38,6 +56,7 @@
   "errors": {
     "loadFailed": "載入失敗",
     "noData": "無法載入資料，請稍後再試",
-    "invalidUrl": "無效的網址參數"
+    "invalidUrl": "無效的網址參數",
+    "unexpected": "發生錯誤，請再試一次。"
   }
 }

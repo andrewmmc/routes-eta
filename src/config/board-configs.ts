@@ -4,7 +4,8 @@
  * Defines board layouts and settings for different operators/stations
  */
 
-import type { OperatorId } from "../models/operator";
+import { DEFAULT_OPERATOR, type OperatorId } from "../models/operator";
+import { isValidOperatorId } from "../utils/validation";
 
 export interface BoardLayoutConfig {
   rows: number; // Number of arrival rows to show
@@ -45,30 +46,47 @@ export function getBoardConfig(id: string): BoardConfig | undefined {
  *
  * TODO: Implement proper param parsing
  */
+export function findMatchingBoardConfig(
+  configs: Iterable<BoardConfig>,
+  operatorId: string,
+  serviceId: string,
+  stopId: string,
+  directionId?: string
+): BoardConfig | undefined {
+  return [...configs].find(
+    (config) =>
+      config.operatorId === operatorId &&
+      config.serviceId === serviceId &&
+      config.stopId === stopId &&
+      config.directionId === directionId
+  );
+}
+
 export function getBoardConfigFromParams(
   operatorId: string,
   serviceId: string,
   stopId: string,
   directionId?: string
 ): BoardConfig {
-  // Try to find existing config
-  const existingConfig = Object.values(BOARD_CONFIGS).find(
-    (config) =>
-      config.operatorId === operatorId &&
-      config.serviceId === serviceId &&
-      config.stopId === stopId &&
-      (directionId === undefined || config.directionId === directionId)
+  const existingConfig = findMatchingBoardConfig(
+    Object.values(BOARD_CONFIGS),
+    operatorId,
+    serviceId,
+    stopId,
+    directionId
   );
 
   if (existingConfig) {
     return existingConfig;
   }
 
-  // Return default config
-  // All MTR lines are supported with this default layout
+  const resolvedOperator = isValidOperatorId(operatorId)
+    ? operatorId
+    : DEFAULT_OPERATOR;
+
   return {
-    id: `${operatorId}-${serviceId}-${stopId}`,
-    operatorId: operatorId as OperatorId,
+    id: `${resolvedOperator}-${serviceId}-${stopId}`,
+    operatorId: resolvedOperator,
     stopId,
     serviceId,
     directionId,

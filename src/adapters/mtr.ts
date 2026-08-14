@@ -17,7 +17,7 @@ import type {
   FetchParams,
   AdapterCapabilities,
 } from "./base";
-import type { BoardState } from "../models";
+import type { Arrival, BoardState } from "../models";
 import { ARRIVAL_STATUS, type ArrivalStatus } from "../models/arrival";
 import {
   MTR_LINES,
@@ -418,6 +418,8 @@ export const mtrAdapter: TransportAdapter = {
       }
     }
 
+    arrivals = dedupeArrivals(arrivals);
+
     return {
       operator: {
         id: "mtr",
@@ -442,5 +444,24 @@ export const mtrAdapter: TransportAdapter = {
     };
   },
 };
+
+function arrivalDedupeKey(arrival: Arrival): string {
+  return [
+    arrival.eta?.getTime() ?? "null",
+    arrival.destination ?? "",
+    arrival.platform ?? "",
+    arrival.direction ?? "",
+  ].join("|");
+}
+
+export function dedupeArrivals(arrivals: Arrival[]): Arrival[] {
+  const seen = new Set<string>();
+  return arrivals.filter((arrival) => {
+    const key = arrivalDedupeKey(arrival);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
 
 export default mtrAdapter;

@@ -2,7 +2,6 @@
  * Custom App Component
  *
  * TODO: Add analytics
- * TODO: Add error boundary
  */
 
 import "@/styles/globals.css";
@@ -12,9 +11,20 @@ import {
   LanguageProvider,
   useLanguageContext,
 } from "@/contexts/LanguageContext";
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { useTranslation } from "@/hooks/useTranslation";
 import enMessages from "../../messages/en.json";
 import zhMessages from "../../messages/zh.json";
+
+function AppErrorBoundary({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
+  return (
+    <ErrorBoundary fallbackMessage={t("errors.unexpected")}>
+      {children}
+    </ErrorBoundary>
+  );
+}
 
 function AppContent({ Component, pageProps }: AppProps) {
   const { language } = useLanguageContext();
@@ -33,7 +43,9 @@ function AppContent({ Component, pageProps }: AppProps) {
       messages={messages}
       timeZone="Asia/Hong_Kong"
     >
-      <Component {...pageProps} />
+      <AppErrorBoundary>
+        <Component {...pageProps} />
+      </AppErrorBoundary>
     </NextIntlClientProvider>
   );
 }

@@ -604,6 +604,28 @@ describe("mtrAdapter.mapToBoardState", () => {
     expect(result.arrivals[0].status).toBe("Delayed");
   });
 
+  it("suppresses duplicate arrivals from the upstream response", async () => {
+    const raw = createMockApiResponse({
+      data: {
+        "TWL-CEN": {
+          curr_time: "2026-01-15 12:00:00",
+          sys_time: "2026-01-15 12:00:00",
+          UP: [
+            { seq: 1, dest: "TSW", plat: "1", time: "2026-01-15 12:05:00" },
+            { seq: 2, dest: "TSW", plat: "1", time: "2026-01-15 12:05:00" },
+            { seq: 3, dest: "TSW", plat: "1", time: "2026-01-15 12:10:00" },
+          ],
+        },
+      },
+    });
+
+    const result = await mtrAdapter.mapToBoardState(raw, defaultParams);
+    expect(result.arrivals).toHaveLength(2);
+    expect(
+      result.arrivals.map((arrival) => arrival.eta?.toISOString())
+    ).toEqual(["2026-01-15T04:05:00.000Z", "2026-01-15T04:10:00.000Z"]);
+  });
+
   it("throws when a train fault response has no valid update time", async () => {
     const raw = {
       sys_time: "-",

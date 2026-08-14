@@ -4,8 +4,8 @@
  * Represents a transport operator (e.g., MTR)
  */
 
-// TODO: Extend this union type when adding new operators (KMB, Citybus, Ferry)
-export type OperatorId = "mtr" | string;
+// Extend this union when adding new operators (KMB, Citybus, Ferry)
+export type OperatorId = "mtr";
 
 export interface Operator {
   id: OperatorId;

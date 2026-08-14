@@ -2,7 +2,8 @@
   "common": {
     "submit": "Submit",
     "cancel": "Cancel",
-    "retry": "Retry"
+    "retry": "Retry",
+    "loading": "Loading"
   },
   "home": {
     "title": "Hong Kong Transport ETA Simulator",
@@ -28,9 +29,26 @@
     "crowding": "Crowding",
     "cars": "cars",
     "arriving": "Arriving",
+    "arr": "Arr",
+    "minute": "min",
     "minutes": "min",
+    "minutesPlural": "mins",
+    "to": "To",
     "noSchedule": "No schedule information",
-    "lastUpdated": "Last updated"
+    "lastUpdated": "Last updated",
+    "status": {
+      "Arrived": "Arrived",
+      "Arriving": "Arriving",
+      "Departing": "Departing",
+      "Delayed": "Delayed",
+      "Scheduled": "Scheduled",
+      "Cancelled": "Cancelled"
+    },
+    "crowdingLevel": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    }
   },
   "nav": {
     "backToHome": "Back to Home"
@@ -38,6 +56,7 @@
   "errors": {
     "loadFailed": "Failed to Load",
     "noData": "Unable to load data, please try again later",
-    "invalidUrl": "Invalid URL parameters"
+    "invalidUrl": "Invalid URL parameters",
+    "unexpected": "Something went wrong. Please try again."
   }
 }

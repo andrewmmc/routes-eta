@@ -131,7 +131,7 @@ export function MTRSelector({
     <>
       {/* Line selector */}
       <div className="mb-4">
-        <label className="mb-1.5 flex items-center gap-1.5">
+        <label htmlFor="mtr-line" className="mb-1.5 flex items-center gap-1.5">
           {selectedLine && MTR_LINES[selectedLine] && (
             <span
               className="inline-block w-2.5 h-2.5 shrink-0"
@@ -144,6 +144,7 @@ export function MTRSelector({
         </label>
         <SelectWrapper>
           <select
+            id="mtr-line"
             className={selectClass}
             value={selectedLine}
             onChange={(e) => onLineChange(e.target.value)}
@@ -167,11 +168,15 @@ export function MTRSelector({
 
       {/* Station selector */}
       <div className="mb-4">
-        <label className="mb-1.5 block text-sm font-code tracking-widest uppercase text-transit-muted">
+        <label
+          htmlFor="mtr-station"
+          className="mb-1.5 block text-sm font-code tracking-widest uppercase text-transit-muted"
+        >
           {t("home.station")}
         </label>
         <SelectWrapper>
           <select
+            id="mtr-station"
             className={selectClass}
             value={selectedStation}
             onChange={(e) => onStationChange(e.target.value)}
@@ -192,11 +197,15 @@ export function MTRSelector({
 
       {/* Direction selector */}
       <div className="mb-6">
-        <label className="mb-1.5 block text-sm font-code tracking-widest uppercase text-transit-muted">
+        <label
+          htmlFor="mtr-direction"
+          className="mb-1.5 block text-sm font-code tracking-widest uppercase text-transit-muted"
+        >
           {t("home.direction")}
         </label>
         <SelectWrapper>
           <select
+            id="mtr-direction"
             className={selectClass}
             value={selectedDirection}
             onChange={(e) => handleDirectionChange(e.target.value)}

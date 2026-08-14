@@ -2,7 +2,9 @@ import { describe, it, expect } from "vitest";
 import {
   getBoardConfig,
   getBoardConfigFromParams,
+  findMatchingBoardConfig,
   BOARD_CONFIGS,
+  type BoardConfig,
 } from "./board-configs";
 
 describe("getBoardConfig", () => {
@@ -19,8 +21,8 @@ describe("getBoardConfigFromParams", () => {
   it("returns default config for unknown operator/service/stop", () => {
     const config = getBoardConfigFromParams("unknown", "UNKNOWN", "UNKNOWN");
 
-    expect(config.id).toBe("unknown-UNKNOWN-UNKNOWN");
-    expect(config.operatorId).toBe("unknown");
+    expect(config.id).toBe("mtr-UNKNOWN-UNKNOWN");
+    expect(config.operatorId).toBe("mtr");
     expect(config.serviceId).toBe("UNKNOWN");
     expect(config.stopId).toBe("UNKNOWN");
     expect(config.layout.rows).toBe(4);
@@ -89,5 +91,37 @@ describe("getBoardConfigFromParams", () => {
 describe("BOARD_CONFIGS", () => {
   it("is currently empty (all configs are dynamic)", () => {
     expect(Object.keys(BOARD_CONFIGS)).toHaveLength(0);
+  });
+});
+
+describe("findMatchingBoardConfig", () => {
+  const directed: BoardConfig = {
+    id: "mtr-TWL-CEN-up",
+    operatorId: "mtr",
+    stopId: "CEN",
+    serviceId: "TWL",
+    directionId: "up",
+    layout: {
+      rows: 4,
+      columns: 1,
+      showPlatform: true,
+      showCrowding: false,
+      showTrainLength: false,
+    },
+  };
+
+  it("does not return a direction-specific override when no direction is requested", () => {
+    expect(
+      findMatchingBoardConfig([directed], "mtr", "TWL", "CEN")
+    ).toBeUndefined();
+  });
+
+  it("matches a direction-specific override only for that direction", () => {
+    expect(
+      findMatchingBoardConfig([directed], "mtr", "TWL", "CEN", "up")
+    ).toEqual(directed);
+    expect(
+      findMatchingBoardConfig([directed], "mtr", "TWL", "CEN", "down")
+    ).toBeUndefined();
   });
 });
