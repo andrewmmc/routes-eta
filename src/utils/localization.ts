@@ -29,5 +29,6 @@ export function formatLocalizedTime(date: Date, lang: Language): string {
     minute: "2-digit",
     second: "2-digit",
     hour12: false,
+    timeZone: "Asia/Hong_Kong",
   });
 }
