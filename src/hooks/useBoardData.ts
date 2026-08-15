@@ -45,8 +45,6 @@ export interface UseBoardDataReturn {
 /**
  * Custom hook to fetch board data
  *
- * TODO: Add proper error handling
- * TODO: Add retry logic
  * TODO: Consider adding offline support
  */
 export function useBoardData({

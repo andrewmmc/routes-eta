@@ -9,9 +9,8 @@
  *   /board/mtr/TWL/CEN/up
  *   /board/kmb/960/wan-chai
  *
- * Invalid routes are redirected to home page.
- *
- * TODO: Add static generation for common routes
+ * Invalid routes are redirected to home page. Valid MTR routes are materialized
+ * for static hosting by scripts/generate-static-board-pages.ts after each build.
  */
 
 import { useRouter } from "next/router";

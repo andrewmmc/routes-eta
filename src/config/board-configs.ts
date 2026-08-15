@@ -32,20 +32,12 @@ export interface BoardConfig {
  */
 export const BOARD_CONFIGS: Record<string, BoardConfig> = {};
 
-/**
- * Get board config by ID
- *
- * TODO: Add validation
- */
+/** Get a pre-defined board config by ID. */
 export function getBoardConfig(id: string): BoardConfig | undefined {
   return BOARD_CONFIGS[id];
 }
 
-/**
- * Get board config from URL params
- *
- * TODO: Implement proper param parsing
- */
+/** Find an exact board config match for route parameters. */
 export function findMatchingBoardConfig(
   configs: Iterable<BoardConfig>,
   operatorId: string,

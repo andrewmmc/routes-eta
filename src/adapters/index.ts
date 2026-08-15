@@ -16,8 +16,6 @@ const adapters: Record<OperatorId, TransportAdapter> = {
 
 /**
  * Get adapter by operator ID
- *
- * TODO: Add proper error handling for unknown operators
  */
 export function getAdapter(operatorId: string): TransportAdapter {
   const adapter = adapters[operatorId as OperatorId];
