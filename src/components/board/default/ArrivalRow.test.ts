@@ -27,8 +27,8 @@ describe("formatETA", () => {
     expect(formatETA(null)).toBe("--");
   });
 
-  it("returns 'Arr' for past time", () => {
-    const pastTime = new Date("2024-01-01T11:59:00Z");
+  it("returns 'Arr' instead of negative minutes for an elapsed eta", () => {
+    const pastTime = new Date("2024-01-01T11:58:00Z");
     expect(formatETA(pastTime)).toBe("Arr");
   });
 

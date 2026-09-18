@@ -138,7 +138,7 @@ export function MTRArrivalRow({
             >
               {labels.noSchedule}
             </span>
-          ) : isArrivingSoon || etaMinutes === 0 ? (
+          ) : isArrivingSoon || etaMinutes <= 0 ? (
             <span
               className={`text-xl text-black md:text-4xl lg:text-6xl ${textFontClass}`}
             >
